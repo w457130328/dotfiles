@@ -1,0 +1,8 @@
+[colors.bright]
+white = "#dddddd"
+
+[font]
+size = 14
+
+[terminal]
+shell = { program = "/bin/zsh", args = ["-l"] }

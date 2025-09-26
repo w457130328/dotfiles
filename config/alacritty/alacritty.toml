@@ -1,0 +1,2 @@
+[general]
+import = ["/home/jiangtao/.config/alacritty/default.toml", "/home/jiangtao/.config/alacritty/active.toml"]
