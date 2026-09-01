@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0002 · 移动窗口与分屏</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>移动窗口与分屏</h1>
+
+  <p>第一课你学会了「浏览」——切焦点、切工作区、开关窗口。这一课学「组织」：把窗口摆成你要的样子。学完你能主动布置屏幕，而不是被动接受默认布局。</p>
+
+  <h2>焦点 vs 窗口：两件事别混</h2>
+  <p>这是从第一课过渡到本课最关键的一步，先分清两个动作：</p>
+  <ul>
+    <li><kbd>Mod</kbd>+<kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd>：移动<b>焦点</b>——你的注意力在窗口之间跳，窗口本身不动。</li>
+    <li><kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd>：移动<b>窗口</b>——把整个窗口换到另一个位置。</li>
+  </ul>
+  <p>记法：加 <kbd>Shift</kbd> = 搬东西（连窗口一起搬）。</p>
+
+  <h2>分屏方向：决定下一个窗口开在哪</h2>
+  <p>i3 是平铺的，新窗口会「挤」进当前窗口旁边。挤到哪边，由<b>分屏方向</b>决定。这词的官方叫法容易晕，记住这条规则就够：</p>
+  <blockquote>
+    <p><kbd>Mod</kbd>+<kbd>z</kbd> = <code>split h</code>：画一条<b>水平</b>分割线 → 新窗口开在<b>右边</b>（左右并排）。<br>
+    <kbd>Mod</kbd>+<kbd>v</kbd> = <code>split v</code>：画一条<b>垂直</b>分割线 → 新窗口开在<b>下面</b>（上下堆叠）。</p>
+  </blockquote>
+  <p>注意方向：<code>h</code> 是「水平分割线」，结果却是左右两个窗口——因为水平线把屏幕竖着切成左右两半。这条在 <a href="../config/i3/config">config</a> 第 85–88 行，术语与 <a href="https://i3wm.org/docs/userguide.html">官方指南「Manipulating layout」</a> 一致。</p>
+
+  <h2>本课要会的键</h2>
+  <table>
+    <tr><th>操作</th><th>按键</th><th>作用</th></tr>
+    <tr><td>移动窗口</td><td><kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>h</kbd>/<kbd>j</kbd>/<kbd>k</kbd>/<kbd>l</kbd></td><td>把焦点窗口移到 左/下/上/右</td></tr>
+    <tr><td>水平分屏</td><td><kbd>Mod</kbd>+<kbd>z</kbd></td><td>下一个新窗口开在右边（左右并排）</td></tr>
+    <tr><td>垂直分屏</td><td><kbd>Mod</kbd>+<kbd>v</kbd></td><td>下一个新窗口开在下面（上下堆叠）</td></tr>
+    <tr><td>切回平铺 / 切分屏方向</td><td><kbd>Mod</kbd>+<kbd>e</kbd></td><td>从 tabbed 切回平铺；已是平铺时在 水平↔垂直 之间切换</td></tr>
+    <tr><td>标签布局</td><td><kbd>Mod</kbd>+<kbd>w</kbd></td><td>把容器变成 tabbed 标签页（像浏览器标签）</td></tr>
+  </table>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"把焦点窗口移到右边，按什么？","options":["Mod+Shift+h","Mod+Shift+j","Mod+Shift+k","Mod+Shift+l"],"answer":3,"explain":"加 Shift 是搬窗口；l 是右。"},
+    {"q":"把焦点窗口移到上方，按什么？","options":["Mod+Shift+h","Mod+Shift+j","Mod+Shift+k","Mod+Shift+l"],"answer":2,"explain":"k 是上，j 是下。"},
+    {"q":"想让下一个新窗口开在右边（左右并排），先按什么？","options":["Mod+z","Mod+v","Mod+e","Mod+w"],"answer":0,"explain":"Mod+z = split h，水平分割线 → 左右并排。"},
+    {"q":"想让下一个新窗口开在下面（上下堆叠），先按什么？","options":["Mod+z","Mod+v","Mod+e","Mod+w"],"answer":1,"explain":"Mod+v = split v，垂直分割线 → 上下堆叠。"},
+    {"q":"把当前容器变成标签页（tabbed）布局，按什么？","options":["Mod+z","Mod+v","Mod+e","Mod+w"],"answer":3,"explain":"Mod+w = layout tabbed；Mod+e 是切换分屏方向。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <ol class="practice">
+    <li>开三个终端（<kbd>Mod</kbd>+<kbd>Enter</kbd>），观察它们默认怎么排。</li>
+    <li>用 <kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>j</kbd> 把焦点窗口往下挪，再按 <kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>k</kbd> 挪回来。</li>
+    <li>先按 <kbd>Mod</kbd>+<kbd>z</kbd>，再开一个新终端——它应该出现在右边。关掉它。</li>
+    <li>先按 <kbd>Mod</kbd>+<kbd>v</kbd>，再开一个新终端——它应该出现在下面。关掉它。</li>
+    <li>按 <kbd>Mod</kbd>+<kbd>w</kbd> 把当前容器切成标签页，再按 <kbd>Mod</kbd>+<kbd>e</kbd> 感受分割方向的切换。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>权威原文见 <a href="https://i3wm.org/docs/userguide.html">i3 官方用户指南</a>的「Manipulating layout」一节。键位以 <a href="../config/i3/config">config/i3/config</a> 为准；速查打印版见 <a href="../reference/i3-keys.html">i3 核心键位速查表</a>。上一课：<a href="0001-i3-basics.html">0001 · i3 是什么，以及你的前 5 个键</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>下一步：<a href="0003-workspace-move.html">0003 · 把窗口搬去别的工作区</a>。有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

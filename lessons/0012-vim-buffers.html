@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0012 · vim buffer 多文件切换（leader = 空格）</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>vim buffer 多文件切换（leader = 空格）</h1>
+
+  <p>前两课你会在单个文件里编辑了。这一课学会<b>在多个文件之间来回切换</b>——这是真正干活时最常用的动作。它全靠一个核心设定：<b>leader = 空格键</b>。</p>
+
+  <h2>什么是 buffer</h2>
+  <p>vim 打开一个文件，把它读进内存，这份内存叫 <b>buffer（缓冲区）</b>。你可以同时打开好几个文件——它们各自是一个 buffer，在后台排着队，你随时切换。注意：buffer ≠ 窗口，你看不到所有 buffer，但它们在等你。</p>
+  <p>所以「切换文件」=「切换 buffer」。你这套配置把切换动作全绑在了 <b>空格</b> 上。</p>
+
+  <h2>leader = 空格</h2>
+  <p><code>.vimrc</code> 第 105 行 <code>let mapleader = "\&lt;Space&gt;"</code>：空格被设为 <b>leader（前缀键）</b>。意思是你<b>先按一下空格，再按另一个键</b>，就触发自定义命令。下面所有「空格+xx」都是这个套路——先敲空格，松开，再敲后面的字母。</p>
+
+  <h2>buffer 切换键（都是 空格+xx）</h2>
+  <table>
+    <tr><th>键</th><th>效果</th></tr>
+    <tr><td><kbd>空格</kbd>+<kbd>l</kbd></td><td>下一个 buffer（向右）</td></tr>
+    <tr><td><kbd>空格</kbd>+<kbd>h</kbd></td><td>上一个 buffer（向左）</td></tr>
+    <tr><td><kbd>空格</kbd>+<kbd>空格</kbd></td><td>切回<b>刚才</b>那个 buffer（来回跳）</td></tr>
+    <tr><td><kbd>空格</kbd>+<kbd>bl</kbd></td><td>列出所有 buffer（<code>:ls</code>）</td></tr>
+    <tr><td><kbd>空格</kbd>+<kbd>bd</kbd></td><td>关闭当前 buffer</td></tr>
+    <tr><td><kbd>空格</kbd>+<kbd>t</kbd></td><td>新建一个空 buffer</td></tr>
+  </table>
+
+  <h2>怎么记</h2>
+  <ul>
+    <li><b><code>l</code> / <code>h</code> 就是「右 / 左」</b>——和你已经会的 <code>hjkl</code> 方向一致：向右 = 下一个，向左 = 上一个。</li>
+    <li><b><code>bd</code> = buffer delete</b>（删 buffer）、<b><code>bl</code> = buffer list</b>（列 buffer）——英文缩写，好记。</li>
+    <li><b>空格+空格</b> 最常用：在两个文件间快速来回跳，敲两下空格就行。</li>
+  </ul>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"切到下一个 buffer，按什么？","options":["空格+l","空格+h","空格+bd","空格+t"],"answer":0,"explain":"空格+l = :bnext 下一个。"},
+    {"q":"在两个文件间来回跳，按什么？","options":["空格+空格","空格+l","空格+h","空格+bl"],"answer":0,"explain":"空格+空格 = 切回刚才的 buffer。"},
+    {"q":"关闭当前 buffer，按什么？","options":["空格+bd","空格+bl","空格+h","空格+l"],"answer":0,"explain":"bd = buffer delete 关闭。"},
+    {"q":"列出所有 buffer，按什么？","options":["空格+bl","空格+bd","空格+t","空格+h"],"answer":0,"explain":"bl = buffer list 列出。"},
+    {"q":"这套配置的 leader 键是？","options":["空格","回车","Tab","Ctrl"],"answer":0,"explain":"let mapleader = 空格。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <ol class="practice">
+    <li>造两个文件：<code>echo one &gt; /tmp/a.txt &amp;&amp; echo two &gt; /tmp/b.txt</code>。</li>
+    <li>一次打开两个：<code>v /tmp/a.txt /tmp/b.txt</code>——vim 显示第一个，第二个在 buffer 里。</li>
+    <li><kbd>空格</kbd>+<kbd>l</kbd>——切到 <code>b.txt</code>；<kbd>空格</kbd>+<kbd>h</kbd>——切回 <code>a.txt</code>。</li>
+    <li><kbd>空格</kbd>+<kbd>空格</kbd>——在两个文件间来回跳几下。</li>
+    <li><kbd>空格</kbd>+<kbd>bl</kbd>——看到所有 buffer 列表（每个前面有编号）。</li>
+    <li><kbd>空格</kbd>+<kbd>bd</kbd>——关闭当前 buffer，切到剩下的那个。</li>
+    <li><kbd>Ctrl</kbd>+<kbd>q</kbd> 退出。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>这些映射见 <a href="../vim/.vimrc">vim/.vimrc</a> 第 105、139–157 行。buffer 概念见 <code>:help buffers</code>。上一课：<a href="0011-vim-editing.html">0011 · vim 编辑</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

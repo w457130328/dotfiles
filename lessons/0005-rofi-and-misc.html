@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0005 · rofi 兜底与常用杂项</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>rofi 兜底与常用杂项</h1>
+
+  <p>这一课收尾：先学你的<b>万能兜底工具 rofi</b>，再把 scratchpad、截图等低频杂项一次打包。</p>
+
+  <h2>rofi：记不住快捷键时的兜底</h2>
+  <p><kbd>Mod</kbd>+<kbd>g</kbd> 会弹出 <b>rofi</b> 应用启动器——一个搜索框，输入名字模糊匹配并启动程序。它的价值在于：<b>你不需要记住任何固定快捷键</b>。比如忘了哪个键开浏览器？按 <kbd>Mod</kbd>+<kbd>g</kbd>，敲 <code>firefox</code> 回车即可。上一课你发现 <kbd>Mod</kbd>+<kbd>Alt</kbd>+<kbd>1</kbd> 因为 chromium 没装而失效——用 rofi 搜 firefox 就是最省事的替代。</p>
+  <p>三个 rofi 变体，一次记住：</p>
+  <table>
+    <tr><th>按键</th><th>功能</th></tr>
+    <tr><td><kbd>Mod</kbd>+<kbd>g</kbd></td><td>应用启动器（搜程序名）</td></tr>
+    <tr><td><kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>g</kbd></td><td>rofimoji 表情 / 符号输入</td></tr>
+    <tr><td><kbd>Mod</kbd>+<kbd>Alt</kbd>+<kbd>6</kbd></td><td>rofi 计算器（直接算数）</td></tr>
+  </table>
+
+  <h2>scratchpad：临时抽屉</h2>
+  <p>scratchpad 像个「抽屉」：把一个窗口暂时藏起来（不占屏幕），需要时再调回来，且跨工作区可用。适合放随时要查的窗口——音乐、TODO、参考文档。</p>
+  <table>
+    <tr><th>按键</th><th>功能</th></tr>
+    <tr><td><kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>-</kbd></td><td>把焦点窗口收进抽屉</td></tr>
+    <tr><td><kbd>Mod</kbd>+<kbd>-</kbd></td><td>把抽屉里的窗口调回来（再按再藏）</td></tr>
+  </table>
+
+  <h2>截图</h2>
+  <table>
+    <tr><th>按键</th><th>功能</th></tr>
+    <tr><td><kbd>Mod</kbd>+<kbd>Home</kbd></td><td>全屏截图，存到 /tmp</td></tr>
+    <tr><td><kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>Home</kbd></td><td>选区截图，存到 /tmp</td></tr>
+  </table>
+
+  <h2>其余杂项速览</h2>
+  <table>
+    <tr><th>按键</th><th>功能</th></tr>
+    <tr><td><kbd>Mod</kbd>+<kbd>`</kbd></td><td>切换键盘布局（<code>_switch-keyboard</code>）</td></tr>
+    <tr><td><kbd>Mod</kbd>+<kbd>x</kbd></td><td>放大镜 kmag</td></tr>
+    <tr><td><kbd>Mod</kbd>+<kbd>Ctrl</kbd>+<kbd>m</kbd></td><td>鼠标移到屏幕角落</td></tr>
+  </table>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"打开应用启动器 rofi（记不住快捷键时的兜底），按什么？","options":["Mod+g","Mod+r","Mod+x","Mod+f"],"answer":0,"explain":"g = 启动器。搜名字就能启动任何程序。"},
+    {"q":"把焦点窗口收进 scratchpad 抽屉，按什么？","options":["Mod+minus","Mod+Shift+minus","Mod+plus","Mod+Shift+plus"],"answer":1,"explain":"Shift+minus 收起；单独 minus 是调回。"},
+    {"q":"把抽屉里的窗口调回来，按什么？","options":["Mod+minus","Mod+Shift+minus","Mod+plus","Mod+Shift+plus"],"answer":0,"explain":"Mod+minus = scratchpad show，再按再藏。"},
+    {"q":"全屏截图（存到 /tmp），按什么？","options":["Mod+Home","Mod+Shift+Home","Mod+Alt+Home","Mod+End"],"answer":0,"explain":"Home 全屏；Shift+Home 选区；Alt+Home 录屏。"},
+    {"q":"打开 rofi 计算器，按什么？","options":["Mod+Alt+6","Mod+Alt+1","Mod+Alt+2","Mod+Alt+9"],"answer":0,"explain":"Alt+6 是 rofi calc，直接算数。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <ol class="practice">
+    <li>按 <kbd>Mod</kbd>+<kbd>g</kbd>，输入 <code>firefox</code> 回车——用它代替失效的 chromium 键。</li>
+    <li>开一个终端，按 <kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>-</kbd> 收进抽屉，再按 <kbd>Mod</kbd>+<kbd>-</kbd> 调回来。</li>
+    <li>按 <kbd>Mod</kbd>+<kbd>Home</kbd> 截全屏，去 <code>/tmp</code> 看文件是否生成。</li>
+    <li>按 <kbd>Mod</kbd>+<kbd>Alt</kbd>+<kbd>6</kbd>，算一个 <code>17*23</code>。</li>
+    <li>按 <kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>g</kbd>，搜一个表情插入。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>scratchpad 的权威讲解见 <a href="https://i3wm.org/docs/userguide.html">i3 官方用户指南</a>「Scratchpad」一节。键位以 <a href="../config/i3/config">config/i3/config</a> 为准；速查打印版见 <a href="../reference/i3-keys.html">i3 核心键位速查表</a>。上一课：<a href="0004-resize-and-float.html">0004 · 调整大小与浮动窗口</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>i3 的 5 课到此结束。接下来：回顾全部键位、做间隔复习，或开始新领域（vim / zsh）。有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+/* Shared course stylesheet — Tufte-inspired, print-friendly, Chinese-first */
+:root {
+  --bg: #fffff8;
+  --fg: #1a1a1a;
+  --muted: #555;
+  --accent: #8b0000;
+  --rule: #ddd;
+  --code-bg: #f5f2ea;
+  --kbd-bg: #fbfbfb;
+  --kbd-border: #b9b9b9;
+  --ok: #1a7f37;
+  --bad: #c62828;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "Noto Serif", Georgia, "Times New Roman", serif;
+  font-size: 1.06rem;
+  line-height: 1.75;
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 7rem;
+}
+
+h1, h2, h3 { line-height: 1.3; font-weight: 700; }
+h1 { font-size: 2.1rem; margin: 0 0 .4rem; }
+h2 { font-size: 1.45rem; margin: 2.6rem 0 .7rem; }
+h3 { font-size: 1.15rem; margin: 1.8rem 0 .5rem; }
+
+p { margin: 0 0 1.1rem; }
+
+a { color: var(--accent); text-decoration: none; border-bottom: 1px solid #d8b8b8; }
+a:hover { border-bottom-color: var(--accent); }
+
+code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.88em;
+  background: var(--code-bg);
+  border-radius: 3px;
+  padding: 0.12em 0.35em;
+}
+
+kbd {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.84em;
+  background: var(--kbd-bg);
+  border: 1px solid var(--kbd-border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0.08em 0.42em;
+  white-space: nowrap;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.2rem 0 1.6rem;
+  font-size: 0.98rem;
+}
+th, td { text-align: left; padding: .45rem .75rem; border-bottom: 1px solid var(--rule); }
+th { font-weight: 700; border-bottom: 2px solid #bbb; }
+tr:last-child td { border-bottom: none; }
+
+blockquote {
+  margin: 1.4rem 0;
+  padding: .2rem 1.2rem;
+  border-left: 3px solid var(--accent);
+  color: var(--muted);
+  font-style: italic;
+}
+
+hr { border: 0; border-top: 1px solid var(--rule); margin: 2.5rem 0; }
+
+/* ---- practice steps ---- */
+.practice { counter-reset: step; margin: 1.2rem 0 1.6rem; }
+.practice li {
+  list-style: none;
+  position: relative;
+  padding: .5rem 0 .5rem 2.3rem;
+  border-bottom: 1px solid var(--rule);
+}
+.practice li:last-child { border-bottom: none; }
+.practice li::before {
+  counter-increment: step;
+  content: counter(step);
+  position: absolute; left: 0; top: .5rem;
+  width: 1.6rem; height: 1.6rem;
+  border: 1px solid var(--kbd-border);
+  border-radius: 50%;
+  text-align: center;
+  line-height: 1.55rem;
+  font-size: .85rem;
+  color: var(--accent);
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+
+/* ---- quiz ---- */
+.quiz { margin: 1.4rem 0 1.8rem; }
+.quiz .q { margin: 0 0 1.5rem; }
+.quiz .prompt { font-weight: 700; margin-bottom: .6rem; }
+.quiz .opts { display: flex; flex-wrap: wrap; gap: .55rem; }
+.quiz button.opt {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: .9rem;
+  background: var(--kbd-bg);
+  border: 1px solid var(--kbd-border);
+  border-radius: 5px;
+  padding: .4rem .8rem;
+  cursor: pointer;
+}
+.quiz button.opt:hover:not(:disabled) { background: #efefe7; }
+.quiz button.opt:disabled { cursor: default; }
+.quiz button.opt.correct { background: #e3f3e8; border-color: var(--ok); color: #0d5524; }
+.quiz button.opt.wrong { background: #fbe5e5; border-color: var(--bad); color: #8e1c1c; }
+.quiz .feedback { margin-top: .55rem; font-size: .95rem; min-height: 1.4em; }
+.quiz .feedback.ok { color: var(--ok); }
+.quiz .feedback.bad { color: var(--bad); }
+
+/* ---- meta / nav ---- */
+.meta {
+  font-size: .85rem;
+  color: var(--muted);
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+}
+.meta a { border-bottom: none; }
+.primary-source {
+  background: #faf6ee;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: .9rem 1.1rem;
+  margin: 1.6rem 0;
+}
+.primary-source .label { font-weight: 700; color: var(--accent); font-size: .85rem; text-transform: uppercase; letter-spacing: .04em; }
+
+@media print {
+  body { max-width: none; padding: 1rem; font-size: 11pt; }
+  .quiz button.opt { border-color: #999; }
+  a { border-bottom: none; }
+}

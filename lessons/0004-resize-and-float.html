@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0004 · 调整大小与浮动窗口</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>调整大小与浮动窗口</h1>
+
+  <p>前面所有键都是一按就生效。这一课学第一个「模式」——<b>resize 模式</b>：先进入，调整，再退出。外加一个高频键：浮动切换。</p>
+
+  <h2>先认识「模式」</h2>
+  <p>「模式」（mode）是 i3 里的一种特殊状态：进入后，某些按键的<b>含义会暂时改变</b>，直到你退出。其实你已经用过一次了——<kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>Esc</kbd> 打开的系统菜单就是一个模式（进入后 <kbd>l</kbd>/<kbd>h</kbd>/<kbd>r</kbd> 不再是别的，而是锁屏/关机/重启）。resize 是第二个，原理一模一样：</p>
+  <blockquote><p><kbd>Mod</kbd>+<kbd>r</kbd> 进入 resize 模式 → <kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd> 调整大小 → <kbd>Esc</kbd>（或 <kbd>Enter</kbd>、再按 <kbd>Mod</kbd>+<kbd>r</kbd>）退出。</p></blockquote>
+
+  <h2>resize 模式：怎么调</h2>
+  <p>进入 resize 模式后，<kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd> 不再移动焦点，而是调整当前窗口大小（<a href="../config/i3/config">config</a> 第 176–188 行）：</p>
+  <table>
+    <tr><th>按键</th><th>效果</th><th>记法</th></tr>
+    <tr><td><kbd>l</kbd></td><td>加宽（右边界往右）</td><td>左右 <kbd>h</kbd>/<kbd>l</kbd> 管<b>宽度</b></td></tr>
+    <tr><td><kbd>h</kbd></td><td>缩窄（左边界往右）</td><td></td></tr>
+    <tr><td><kbd>j</kbd></td><td>增高（下边界往下）</td><td>上下 <kbd>j</kbd>/<kbd>k</kbd> 管<b>高度</b></td></tr>
+    <tr><td><kbd>k</kbd></td><td>变矮（上边界往下）</td><td></td></tr>
+  </table>
+  <p>口诀：<b>h/l 调宽度，j/k 调高度</b>。进入后不用纠结方向——按一下 <kbd>l</kbd> 看窗口变宽了，就是对的；按反了再按另一个键即可，反馈立竿见影。</p>
+
+  <h2>浮动切换</h2>
+  <table>
+    <tr><th>操作</th><th>按键</th></tr>
+    <tr><td>平铺 ↔ 浮动 切换</td><td><kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>Space</kbd></td></tr>
+  </table>
+  <p>有些窗口（小工具、弹窗）浮动更顺手。切到浮动后，用 <kbd>Mod</kbd>+鼠标左键拖拽它、<kbd>Mod</kbd>+鼠标右键调整大小（这是 i3 默认的浮动鼠标操作，见 <code>floating_modifier $mod</code>）。再按一次切回平铺。</p>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"进入「调整大小」模式，按什么？","options":["Mod+r","Mod+f","Mod+s","Mod+w"],"answer":0,"explain":"r = resize。进入后 hjkl 变成调整大小。"},
+    {"q":"在 resize 模式里，加宽窗口（右边界往右），按什么？","options":["h","j","k","l"],"answer":3,"explain":"h/l 管宽度，l 是加宽（往右扩）。"},
+    {"q":"在 resize 模式里，增高窗口（下边界往下），按什么？","options":["h","j","k","l"],"answer":1,"explain":"j/k 管高度，j 是增高（往下扩）。"},
+    {"q":"在 resize 模式里，让窗口变矮，按什么？","options":["h","j","k","l"],"answer":2,"explain":"k 是变矮（上边界往下收）。"},
+    {"q":"让当前窗口在平铺 / 浮动之间切换，按什么？","options":["Mod+Shift+Space","Mod+Space","Mod+Shift+Enter","Mod+Shift+Esc"],"answer":0,"explain":"Shift+Space 切换浮动；Mod+Space 是切换焦点在平铺/浮动窗口之间。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <ol class="practice">
+    <li>开两个终端（<kbd>Mod</kbd>+<kbd>Enter</kbd>）。</li>
+    <li>按 <kbd>Mod</kbd>+<kbd>r</kbd> 进入 resize 模式，连按几次 <kbd>l</kbd> 加宽，再按 <kbd>h</kbd> 缩回。</li>
+    <li>按 <kbd>j</kbd> 增高、<kbd>k</kbd> 变矮，观察窗口边界的移动。</li>
+    <li>按 <kbd>Esc</kbd> 退出，确认 <kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd> 又变回移动焦点。</li>
+    <li>对某个窗口按 <kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>Space</kbd> 浮动它，用 <kbd>Mod</kbd>+鼠标左键拖拽，再按一次切回平铺。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>resize 与 floating 的权威讲解见 <a href="https://i3wm.org/docs/userguide.html">i3 官方用户指南</a>「Resizing containers / Floating」。键位以 <a href="../config/i3/config">config/i3/config</a> 为准；速查打印版见 <a href="../reference/i3-keys.html">i3 核心键位速查表</a>。上一课：<a href="0003-workspace-move.html">0003 · 把窗口搬去别的工作区</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>下一步：<a href="0005-rofi-and-misc.html">0005 · rofi 兜底与常用杂项</a>。有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0018 · UltiSnips：代码片段</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>UltiSnips：代码片段</h1>
+
+  <p>这一课学 <b>UltiSnips</b>——帮你把几个字母<b>展开成一大段代码模板</b>。比如敲 <code>sec</code> 再按一下 <kbd>Tab</kbd>，就长出标题 <code># … #</code>；敲 <code>main</code> + <kbd>Tab</kbd>，就长出 Java 的 main 方法。省去一遍遍手打样板代码。</p>
+
+  <h2>关键概念：snippet = 触发词 + 占位符</h2>
+  <ul>
+    <li><b>触发词</b>：几个字母（如 <code>sec</code>、<code>cbl</code>、<code>main</code>），敲完按 <kbd>Tab</kbd> 就展开。</li>
+    <li><b>占位符</b>：展开后的模板里，光标会自动停在第一个「空位」上等你填；填完按 <kbd>Tab</kbd> 跳下一个空位，最后跳到结尾。</li>
+  </ul>
+
+  <h2>三个键</h2>
+  <table>
+    <tr><th>键</th><th>作用</th></tr>
+    <tr><td><kbd>Tab</kbd></td><td>展开 snippet（有匹配时）</td></tr>
+    <tr><td><kbd>Tab</kbd></td><td>跳到<b>下一个</b>占位符</td></tr>
+    <tr><td><kbd>Shift</kbd>+<kbd>Tab</kbd></td><td>跳回<b>上一个</b>占位符</td></tr>
+  </table>
+  <p>配置见 <a href="../vim/.vimrc">.vimrc</a> 第 67–69 行。<kbd>Tab</kbd> 身兼两职：有 snippet 匹配就展开，没有就退回普通的<b>自动补全</b>（supertab，等于 <kbd>Ctrl</kbd>+<kbd>n</kbd>）。</p>
+
+  <h2>⚠️ snippet 认文件类型</h2>
+  <p>snippet 是按<b>文件类型</b>加载的：markdown 的 snippet 只在 <code>.md</code> 文件里有效，Java 的只在 <code>.java</code> 里有效。所以练习时要用对扩展名——文件名结尾决定一切。</p>
+
+  <h2>几个常用的（markdown）</h2>
+  <table>
+    <tr><th>敲</th><th>展开成</th></tr>
+    <tr><td><code>sec</code> + Tab</td><td><code># … #</code>（一级标题）</td></tr>
+    <tr><td><code>ssec</code> + Tab</td><td><code>## … ##</code>（二级标题）</td></tr>
+    <tr><td><code>sssec</code> + Tab</td><td><code>### … ###</code>（三级标题）</td></tr>
+    <tr><td><code>cbl</code> + Tab</td><td><code>``` … ```</code>（代码块）</td></tr>
+    <tr><td><code>link</code> + Tab</td><td><code>[文字](http://链接)</code>（链接）</td></tr>
+    <tr><td><code>img</code> + Tab</td><td><code>![说明](路径)</code>（图片）</td></tr>
+  </table>
+
+  <h2>代码类的（Java 举例）</h2>
+  <p>你装了 IntelliJ，写 Java 时会用到这两个：</p>
+  <table>
+    <tr><th>敲</th><th>展开成</th></tr>
+    <tr><td><code>cl</code> + Tab</td><td><code>public class 文件名 { }</code>（类骨架）</td></tr>
+    <tr><td><code>main</code> + Tab</td><td><code>public static void main(String[] args) { }</code></td></tr>
+  </table>
+  <p>Python 的 <code>def</code>、<code>class</code>、<code>ifmain</code>，Shell 的常用片段同理，都在对应的 snippet 文件里。等你写那种语言时再翻不迟。</p>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"展开 snippet，敲完触发词后按什么？","options":["Tab","Enter","空格","Esc"],"answer":0,"explain":"Tab 展开 snippet。"},
+    {"q":"展开后跳到下一个空位，按什么？","options":["Tab","Shift+Tab","Enter","Ctrl+j"],"answer":0,"explain":"Tab 前进一个占位符。"},
+    {"q":"跳回上一个空位，按什么？","options":["Shift+Tab","Tab","Esc","u"],"answer":0,"explain":"Shift+Tab 回退一个占位符。"},
+    {"q":"markdown 里敲 sec + Tab，得到什么？","options":["# … # 一级标题","## … ## 二级标题","代码块","链接"],"answer":0,"explain":"sec = Section，一级标题。"},
+    {"q":"snippet 为什么有时敲了不展开？","options":["文件类型不对","vim 坏了","Tab 没绑","插件没装"],"answer":0,"explain":"snippet 按文件类型加载，.md 才能用 markdown 片段。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <ol class="practice">
+    <li><code>v /tmp/test.md</code>（注意 <b>.md</b> 扩展名，否则 markdown 片段不生效）。</li>
+    <li>敲 <code>sec</code> 然后 <kbd>Tab</kbd>——长出 <code># Section Name #</code>，光标选中 <code>Section Name</code>。</li>
+    <li>直接打字 <code>我的标题</code>（替换占位符），按 <kbd>Tab</kbd>——光标跳到标题末尾。</li>
+    <li>按 <kbd>o</kbd> 开新行，敲 <code>ssec</code> + <kbd>Tab</kbd>——二级标题，填 <code>小节</code>。</li>
+    <li>再 <kbd>o</kbd>，敲 <code>cbl</code> + <kbd>Tab</kbd>——长出代码块，打几行字。</li>
+    <li>再 <kbd>o</kbd>，敲 <code>link</code> + <kbd>Tab</kbd>——长出链接模板，用 <kbd>Tab</kbd> 在「文字」和「网址」之间跳着填。</li>
+    <li>试着 <kbd>Shift</kbd>+<kbd>Tab</kbd> 往回跳，体会占位符的来回。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>UltiSnips 权威文档见 <a href="https://github.com/SirVer/ultisnips">SirVer/ultisnips</a>，或 vim 里 <code>:help ultisnips</code>。触发键在 <a href="../vim/.vimrc">.vimrc</a> 第 67–69 行；具体片段在 <a href="../vim/.vim/bundle/vim-snippets/UltiSnips/markdown.snippets">vim-snippets</a>。上一课：<a href="0017-vim-undotree.html">0017 · undotree</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

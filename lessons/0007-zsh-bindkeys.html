@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0007 · zsh 快捷键（bindkey）</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>zsh 快捷键（bindkey）</h1>
+
+  <p>上一课学的别名帮你少打字，这一课学的快捷键帮你<b>少敲命令</b>——按一个键，直接完成「清屏 + 列目录」「插入日期」「git status」这些高频动作。它们定义在 <a href="../zsh/oh-my-zsh-custom/custom/shortcuts.zsh">shortcuts.zsh</a>，通过 <code>bindkey</code> 绑定。</p>
+
+  <h2>这 6 个快捷键</h2>
+  <p>都在 <b>emacs 模式</b>下生效（zsh 默认模式，你的 <code>.zshrc</code> 没改成 vi 模式）：</p>
+  <table>
+    <tr><th>按键</th><th>效果</th></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>K</kbd></td><td>清屏，并列出当前目录（<code>exa -al</code>）</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>J</kbd></td><td>清屏，并显示 2 层目录树（<code>tree -L 2</code>）</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>H</kbd></td><td>清屏，并显示 3 层目录树（<code>tree -L 3</code>）</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>T</kbd></td><td>在光标处插入当前日期（ISO 8601）</td></tr>
+    <tr><td><kbd>Esc</kbd> 再 <kbd>Ctrl</kbd>+<kbd>T</kbd></td><td>在光标处插入 Unix 时间戳（秒）</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>G</kbd></td><td>清屏，并显示 <code>git status</code></td></tr>
+  </table>
+
+  <h2>最实用的两个</h2>
+  <ul>
+    <li><kbd>Ctrl</kbd>+<kbd>T</kbd>：写文档、写 commit 时要填日期，不用背今天的日期，按一下自动插进去。</li>
+    <li><kbd>Ctrl</kbd>+<kbd>G</kbd>：在 git 仓库里想看状态，一个键就出 <code>git status</code>（你这 <code>dotfiles</code> 目录就是 git 仓库，直接就能试）。</li>
+  </ul>
+
+  <p><b>提醒</b>：这些键覆盖了 zsh 的默认行为——比如 <kbd>Ctrl</kbd>+<kbd>K</kbd> 默认是「删除到行尾」、<kbd>Ctrl</kbd>+<kbd>T</kbd> 默认是「交换相邻字符」。这套配置把它们改成了上面的功能。所以别惊讶这些键「不是你以为的那样」。</p>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"想在命令行插入当前日期，按什么？","options":["Ctrl+T","Ctrl+K","Ctrl+G","Ctrl+J"],"answer":0,"explain":"Ctrl+T = print-current-date，插入 ISO 8601 日期。"},
+    {"q":"想清屏并列出当前目录，按什么？","options":["Ctrl+T","Ctrl+K","Ctrl+G","Ctrl+J"],"answer":1,"explain":"Ctrl+K = clear-ls-all，清屏后 exa -al。"},
+    {"q":"想清屏并显示 git status，按什么？","options":["Ctrl+T","Ctrl+K","Ctrl+G","Ctrl+J"],"answer":2,"explain":"Ctrl+G = git-status。"},
+    {"q":"想清屏并显示 2 层目录树，按什么？","options":["Ctrl+T","Ctrl+K","Ctrl+G","Ctrl+J"],"answer":3,"explain":"Ctrl+J = clear-tree-2，Ctrl+H 是 3 层。"},
+    {"q":"想插入 Unix 时间戳（秒），按什么？","options":["Esc 再 Ctrl+T","Ctrl+T","Ctrl+G","Ctrl+K"],"answer":0,"explain":"先按 Esc 松开，再按 Ctrl+T = print-unix-timestamp。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <ol class="practice">
+    <li>在提示符后按 <kbd>Ctrl</kbd>+<kbd>T</kbd>——光标处会插入今天的日期。</li>
+    <li>按 <kbd>Ctrl</kbd>+<kbd>K</kbd>——清屏并列出当前目录文件。</li>
+    <li>按 <kbd>Ctrl</kbd>+<kbd>J</kbd>——清屏并显示 2 层目录树。</li>
+    <li>在任意 git 目录（比如这个 <code>dotfiles</code>）按 <kbd>Ctrl</kbd>+<kbd>G</kbd>——直接看到 <code>git status</code>。</li>
+    <li>先按 <kbd>Esc</kbd> 松开，再按 <kbd>Ctrl</kbd>+<kbd>T</kbd>——插入一串数字（Unix 时间戳）。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>这些绑定以 <a href="../zsh/oh-my-zsh-custom/custom/shortcuts.zsh">shortcuts.zsh</a> 为准。zle/bindkey 的权威说明见 <a href="https://zsh.sourceforge.io/Doc/Release/Zsh-Line-Editor.html">zsh 官方手册「Zsh Line Editor」</a>。速查打印版见 <a href="../reference/zsh-aliases.html">zsh 快捷速查表</a>。上一课：<a href="0006-zsh-global-aliases.html">0006 · 全局别名</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>下一步：<a href="#">0008 · 后缀别名与普通别名</a>（即将到来）。有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

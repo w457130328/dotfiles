@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0020 · vim 特色工具：拼写、标题、大字</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>vim 特色工具：拼写、标题、大字</h1>
+
+  <p>最后一课，三个「写作 / 装点」类的小工具，都是这套配置的特色。日常写英文文档、做演示标题时会用到。</p>
+
+  <h2>① 拼写检查：Ctrl+]</h2>
+  <p><kbd>Ctrl</kbd>+<kbd>]</kbd> = 切换英文拼写检查（<code>:set spell!</code>）。开启后，拼错的英文单词会高亮。写完英文 README / 邮件按一下检查，查完再按一下关掉。</p>
+
+  <h2>② 标题大写：空格+c</h2>
+  <p><kbd>空格</kbd>+<kbd>c</kbd> = 把当前行（或 visual 选中的文字）转成 <b>AP 风格的英文标题</b>（重要词首字母大写，介词/连词保持小写）。</p>
+  <pre>a river runs through the city  →  A River Runs Through the City</pre>
+  <p>用法：光标停在标题行上，按 <kbd>空格</kbd>+<kbd>c</kbd>。visual 模式选中多行也能一起转。</p>
+
+  <h2>③ ASCII 大字：空格+1 / 2 / 3</h2>
+  <p>把当前行文字变成 <b>toilet 风格的 ASCII 大字</b>，三种样式：</p>
+  <table>
+    <tr><th>键</th><th>样式</th></tr>
+    <tr><td><kbd>空格</kbd>+<kbd>1</kbd></td><td>带边框（<code>-f term -F border</code>）✅ 能用</td></tr>
+    <tr><td><kbd>空格</kbd>+<kbd>2</kbd></td><td>标准字体（<code>-f standard</code>）⚠️ 你的机器缺字体，报错</td></tr>
+    <tr><td><kbd>空格</kbd>+<kbd>3</kbd></td><td>小字体（<code>-f small</code>）⚠️ 同样缺字体，报错</td></tr>
+  </table>
+  <p>适合给笔记、README、演示加个大标题。<b>你的 Arch 上 toilet 没有 <code>standard</code>/<code>small</code> 这两个字体名</b>，所以 <kbd>空格</kbd>+<kbd>2/3</kbd> 会报 <code>could not load font</code>，只有 <kbd>空格</kbd>+<kbd>1</kbd> 能用。想救活需把字体名换成 <code>mono12</code>/<code>smmono12</code>（改得动，先记着）。</p>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"切换英文拼写检查，按什么？","options":["Ctrl+]","Ctrl+s","空格+c","Ctrl+p"],"answer":0,"explain":"Ctrl+] = :set spell!。"},
+    {"q":"把当前行转成 AP 风格标题，按什么？","options":["空格+c","Ctrl+c","空格+t","Ctrl+]"],"answer":0,"explain":"空格+c = capitalize-title。"},
+    {"q":"把文字变成带边框的 ASCII 大字，按什么？","options":["空格+1","空格+2","空格+3","空格+a"],"answer":0,"explain":"空格+1 = toilet -f term -F border，带边框。"},
+    {"q":"空格+2 得到什么样式？","options":["标准字体大字","带边框大字","小字体大字","普通小写"],"answer":0,"explain":"空格+2 = -f standard 标准字体。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <ol class="practice">
+    <li><code>v /tmp/test.txt</code>，<kbd>o</kbd> 打一行 <code>a river runs through the city</code>。</li>
+    <li>光标停在这行，按 <kbd>空格</kbd>+<kbd>c</kbd>——变成 <code>A River Runs Through the City</code>。</li>
+    <li>再 <kbd>o</kbd> 打一行 <code>hello world</code>，按 <kbd>空格</kbd>+<kbd>1</kbd>——变成带边框的 ASCII 大字。</li>
+    <li>按 <kbd>Ctrl</kbd>+<kbd>]</kbd> 开拼写，随便打个错词（如 <code>teh</code>），看它高亮；再按一次关掉。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>这些映射见 <a href="../vim/.vimrc">.vimrc</a>：拼写第 155 行，标题大写第 166–167 行，toilet 大字第 161–164 行。上一课：<a href="0019-vim-save-direction.html">0019 · vim 收尾</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

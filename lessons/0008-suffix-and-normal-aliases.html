@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0008 · 普通别名与后缀别名</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>普通别名与后缀别名</h1>
+
+  <p>前两课学了全局别名（管道后缀）。这一课补全剩下的两类，你就把 zsh 三种别名都掌握了。它们都定义在 <a href="../zsh/.aliases">zsh/.aliases</a>。</p>
+
+  <h2>三种别名各管一段</h2>
+  <table>
+    <tr><th>类型</th><th>写法</th><th>展开位置</th><th>例子</th></tr>
+    <tr><td>普通别名</td><td><code>alias c='cat'</code></td><td>只能替换<b>命令开头</b></td><td><code>c 文件</code> → <code>cat 文件</code></td></tr>
+    <tr><td>全局别名</td><td><code>alias -g L='| less'</code></td><td>命令<b>任何位置</b></td><td><code>ps aux L</code> → <code>ps aux | less</code></td></tr>
+    <tr><td>后缀别名</td><td><code>alias -s pdf='…'</code></td><td>按<b>文件名后缀</b>触发</td><td><code>报告.pdf</code> → 自动用 pdf 程序打开</td></tr>
+  </table>
+
+  <h2>普通别名：命令开头的缩写</h2>
+  <p>先记这几个高频的（都在命令开头敲）：</p>
+  <table>
+    <tr><th>别名</th><th>展开成</th><th>用途</th></tr>
+    <tr><td><code>c</code></td><td><code>cat</code></td><td>看文件内容</td></tr>
+    <tr><td><code>v</code></td><td><code>vim</code></td><td>编辑文件</td></tr>
+    <tr><td><code>v.</code></td><td><code>vim .</code></td><td>用 vim 打开当前目录</td></tr>
+    <tr><td><code>le</code></td><td><code>less -j4</code></td><td>分页看（<kbd>q</kbd> 退出）</td></tr>
+    <tr><td><code>sz</code></td><td><code>source ~/.zshrc</code></td><td>重载配置（改完 .zshrc 必用）</td></tr>
+    <tr><td><code>h</code></td><td><code>hash -rf</code></td><td>清空命令路径缓存</td></tr>
+  </table>
+  <p>其中 <code>sz</code> 最值得记——你以后改任何 zsh 配置，改完敲 <code>sz</code> 就生效，不用重开终端。</p>
+
+  <h2>后缀别名：敲文件名就自动打开</h2>
+  <p>这是 zsh 独有的（bash 没有）。机制：当你敲的「命令」其实是一个<b>带已知后缀的文件名</b>时，zsh 就按后缀补上对应的打开命令。比如：</p>
+  <blockquote>
+    <p>敲 <code>t.zip</code> → zsh 看到 <code>.zip</code> → 执行 <code>unzip -l t.zip</code></p>
+  </blockquote>
+  <p>你不用敲 <code>unzip -l</code>，直接敲文件名就行。定义长这样（见 <a href="../zsh/.aliases">zsh/.aliases</a> 第 299–307 行）：</p>
+  <pre><code>alias -s {zip,ZIP,war,WAR}="unzip -l"
+alias -s {jar,JAR}="java -jar"
+alias -s gz="tar -tf"
+alias -s {pdf,PDF}='background mupdf'   # ← 这种会失败，见下</code></pre>
+
+  <h2>⚠️ 你的机器上，哪些后缀别名能用</h2>
+  <p>作者的后缀别名分两类：</p>
+  <ul>
+    <li><b>命令行查看</b>（<code>unzip -l</code> / <code>java -jar</code> / <code>tar -tf</code>）——<b>能用</b>，因为这些命令装了。</li>
+    <li><b>后台打开图形程序</b>（<code>background mupdf</code> / <code>gpicview</code> / <code>chromium</code> / <code>vlc</code> / <code>libreoffice</code>）——<b>全都失效</b>，因为那几个程序你这台机器没装。</li>
+  </ul>
+  <p><code>background</code> 是作者自定义的函数（<a href="../zsh/oh-my-zsh-custom/custom/autocomplete.zsh">autocomplete.zsh</a> 第 47 行），作用是把程序<b>放到后台</b>跑、不占住终端——所以打开 PDF 后终端还能继续敲命令。但程序没装，函数再巧妙也白搭。</p>
+  <p>所以现在你只需要记住三个<b>能用的</b>后缀：<code>.jar</code>、<code>.zip</code>、<code>.gz</code>。</p>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"敲 c 文件.txt 等价于什么？","options":["cat 文件.txt","cp 文件.txt","cd 文件.txt","less 文件.txt"],"answer":0,"explain":"c = cat，看文件内容。"},
+    {"q":"改完 ~/.zshrc 后要立即生效，敲什么？","options":["sz","h","c","le"],"answer":0,"explain":"sz = source ~/.zshrc，重载配置。"},
+    {"q":"敲 t.jar 会触发什么？","options":["java -jar t.jar","unzip -l t.jar","tar -tf t.jar","vim t.jar"],"answer":0,"explain":"后缀 .jar → java -jar。"},
+    {"q":"敲 t.zip 会触发什么？","options":["unzip -l t.zip","java -jar t.zip","tar -tf t.zip","vim t.zip"],"answer":0,"explain":"后缀 .zip → unzip -l，列出内容。"},
+    {"q":"敲 t.tar.gz 会触发什么？","options":["tar -tf t.tar.gz","unzip -l t.tar.gz","java -jar t.tar.gz","vim t.tar.gz"],"answer":0,"explain":"后缀 .gz → tar -tf，列出内容。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <p>普通别名：</p>
+  <ol class="practice">
+    <li>敲 <code>c zsh/.aliases</code>——直接打印别名文件内容。</li>
+    <li>敲 <code>le zsh/.aliases</code>——分页看，<kbd>q</kbd> 退出。</li>
+    <li>敲 <code>sz</code>——看到提示符刷新（重载配置，无害）。</li>
+  </ol>
+  <p>后缀别名（用 <code>tar</code> 造测试文件——<code>zip</code> 命令没装，但 <code>tar</code>/<code>unzip</code> 都在）：</p>
+  <ol class="practice">
+    <li><code>cd /tmp && echo hi &gt; t.txt</code>——造一个文件。</li>
+    <li><code>tar czf t.tar.gz t.txt</code>——打包成一个 tar.gz。</li>
+    <li><b>直接敲 <code>t.tar.gz</code></b>——不用 tar 命令，看到 tar 内容清单。</li>
+    <li><code>tar czf t.tgz t.txt</code>——再试 .tgz 后缀，效果一样。</li>
+    <li><b>直接敲 <code>t.tgz</code></b>——同样列出内容。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>后缀别名的权威定义见 <a href="https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html">zsh 官方手册的 alias 内置命令</a>（<code>-s</code> 选项）。你的别名以 <a href="../zsh/.aliases">zsh/.aliases</a> 为准；速查打印版见 <a href="../reference/zsh-aliases.html">zsh 别名速查表</a>。上一课：<a href="0007-zsh-bindkeys.html">0007 · zsh 快捷键</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

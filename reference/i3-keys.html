@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>i3 核心键位速查表</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>i3 核心键位速查表</h1>
+  <p><b>Mod = Super / Win 键</b>（配置里 <code>set $mod Mod4</code>）。这套配置用 Vim 式 <kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd> 方向键。打印出来贴桌上，用于间隔复习。</p>
+  <p><b>注意</b>：配置里 <code>workspace_layout tabbed</code>（config 第 10 行）——新工作区默认是标签页布局，不是平铺。想平铺就按 <kbd>Mod</kbd>+<kbd>e</kbd>。</p>
+  <p><b>注意</b>：chromium / intellij-idea-ultimate-edition / spotify 未安装，<kbd>Mod</kbd>+<kbd>Alt</kbd>+<kbd>1</kbd>/<kbd>3</kbd>/<kbd>5</kbd> 失效；开浏览器用 <kbd>Mod</kbd>+<kbd>Alt</kbd>+<kbd>2</kbd>（firefox）或 <kbd>Mod</kbd>+<kbd>g</kbd> 搜 firefox。</p>
+
+  <h2>浏览（0001）</h2>
+  <table>
+    <tr><th>操作</th><th>按键</th></tr>
+    <tr><td>开终端</td><td><kbd>Mod</kbd>+<kbd>Enter</kbd></td></tr>
+    <tr><td>移动焦点 左/下/上/右</td><td><kbd>Mod</kbd>+<kbd>h</kbd>/<kbd>j</kbd>/<kbd>k</kbd>/<kbd>l</kbd></td></tr>
+    <tr><td>切换工作区 1–10</td><td><kbd>Mod</kbd>+<kbd>1</kbd>…<kbd>0</kbd></td></tr>
+    <tr><td>关闭焦点窗口</td><td><kbd>Mod</kbd>+<kbd>q</kbd></td></tr>
+    <tr><td>系统菜单（关机/锁屏/重启）</td><td><kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>Esc</kbd>，再按 <kbd>h</kbd>/<kbd>l</kbd>/<kbd>r</kbd></td></tr>
+  </table>
+
+  <h2>组织布局（0002）</h2>
+  <table>
+    <tr><th>操作</th><th>按键</th></tr>
+    <tr><td>移动窗口 左/下/上/右</td><td><kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>h</kbd>/<kbd>j</kbd>/<kbd>k</kbd>/<kbd>l</kbd></td></tr>
+    <tr><td>水平分屏（新窗口在右）</td><td><kbd>Mod</kbd>+<kbd>z</kbd></td></tr>
+    <tr><td>垂直分屏（新窗口在下）</td><td><kbd>Mod</kbd>+<kbd>v</kbd></td></tr>
+    <tr><td>切回平铺 / 切分屏方向</td><td><kbd>Mod</kbd>+<kbd>e</kbd></td></tr>
+    <tr><td>标签页（tabbed）布局</td><td><kbd>Mod</kbd>+<kbd>w</kbd></td></tr>
+  </table>
+
+  <blockquote>
+    <p><b>记法</b>：<kbd>v</kbd> = <b>v</b>ertical（垂直）→ 新窗口在下；<kbd>z</kbd> = 剩下的水平 → 新窗口在右。口诀：<b>「v 往下，z 往右」</b>。</p>
+  </blockquote>
+
+  <h2>工作区进阶（0003）</h2>
+  <table>
+    <tr><th>操作</th><th>按键</th></tr>
+    <tr><td>切到上/下一个工作区</td><td><kbd>Mod</kbd>+<kbd>Ctrl</kbd>+<kbd>h</kbd> / <kbd>l</kbd></td></tr>
+    <tr><td>把窗口搬到工作区 N（自己不跟）</td><td><kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd>…<kbd>0</kbd></td></tr>
+    <tr><td>搬窗口到上/下个工作区并跟过去</td><td><kbd>Mod</kbd>+<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>h</kbd> / <kbd>l</kbd></td></tr>
+    <tr><td>全屏切换</td><td><kbd>Mod</kbd>+<kbd>f</kbd></td></tr>
+  </table>
+
+  <h2>调整与浮动（0004）</h2>
+  <table>
+    <tr><th>操作</th><th>按键</th></tr>
+    <tr><td>进入 resize 模式</td><td><kbd>Mod</kbd>+<kbd>r</kbd>，然后 <kbd>h</kbd>/<kbd>l</kbd> 调宽度、<kbd>j</kbd>/<kbd>k</kbd> 调高度，<kbd>Esc</kbd> 退出</td></tr>
+    <tr><td>平铺 ↔ 浮动切换</td><td><kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>Space</kbd></td></tr>
+  </table>
+
+  <h2>rofi 与杂项（0005）</h2>
+  <table>
+    <tr><th>操作</th><th>按键</th></tr>
+    <tr><td>应用启动器（兜底）</td><td><kbd>Mod</kbd>+<kbd>g</kbd></td></tr>
+    <tr><td>表情 / 符号输入</td><td><kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>g</kbd></td></tr>
+    <tr><td>计算器（失效：rofi-calc 未装）</td><td><kbd>Mod</kbd>+<kbd>Alt</kbd>+<kbd>6</kbd>，改用 <code>echo $((…))</code></td></tr>
+    <tr><td>scratchpad 收起 / 调回</td><td><kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>-</kbd> / <kbd>Mod</kbd>+<kbd>-</kbd></td></tr>
+    <tr><td>截图（全屏 / 选区）</td><td><kbd>Mod</kbd>+<kbd>Home</kbd> / <kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>Home</kbd></td></tr>
+    <tr><td>键盘布局切换</td><td><kbd>Mod</kbd>+<kbd>`</kbd>（grave）</td></tr>
+    <tr><td>放大镜</td><td><kbd>Mod</kbd>+<kbd>x</kbd></td></tr>
+  </table>
+
+  <p>完整键位见 <a href="../config/i3/USAGE.md">USAGE.md</a> 和 <a href="../config/i3/config">config</a>。官方默认键位对照见 <a href="https://i3wm.org/docs/refcard.html">i3 Reference Card</a>。</p>
+
+</body>
+</html>

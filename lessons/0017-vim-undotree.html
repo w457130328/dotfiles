@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0017 · undotree：撤销树可视化</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>undotree：撤销树可视化</h1>
+
+  <p>上一课学了 <code>u</code> 撤销。这一课学它的进阶——<b>undotree</b> 插件，把整个撤销历史<b>画成一张图</b>，让你能跳回任何一步。它的核心价值：<b>放心大胆改，因为永远回得去。</b></p>
+
+  <h2>关键概念：撤销不是一条线，是一棵树</h2>
+  <p>你可能以为撤销历史是线性的：改 → 改 → 改，然后 <code>u</code> 一路退回去。但真实情况是<b>树状</b>的：你撤销了几步之后，又在那个状态上做了新编辑，就「分叉」出一条新分支。普通的 <code>u</code>/<kbd>Ctrl</kbd>+<kbd>r</kbd> 只能在线性主干上来回走，<b>到不了分叉出去的节点</b>。undotree 把这些分支全画出来。</p>
+
+  <h2>用法</h2>
+  <ol>
+    <li>敲 <code>:UndotreeToggle</code> 回车——左边弹出撤销树面板。</li>
+    <li><b>先按 <kbd>Ctrl</kbd>+<kbd>w</kbd> 再按 <kbd>h</kbd></b>——把光标切进左边的面板（否则 j/k 还在编辑文件）。</li>
+    <li>面板里 <kbd>j</kbd> / <kbd>k</kbd> 上下移动，<kbd>Enter</kbd> 跳转到那个历史状态。</li>
+    <li>按 <kbd>Ctrl</kbd>+<kbd>w</kbd> <kbd>l</kbd> 回编辑区，或再敲 <code>:UndotreeToggle</code> 关闭面板。</li>
+  </ol>
+  <p>面板里每一行是一个历史状态，带时间戳。你会发现「主干」之外还有分叉——那些就是你 <code>u</code> 到一半又继续改产生的分支。</p>
+
+  <h2>什么时候用</h2>
+  <ul>
+    <li>你 <code>u</code> 撤销过头了，想回到中间某个具体状态。</li>
+    <li>你改乱了一团，想看看「刚才那个能跑的版本」长什么样，跳回去看一眼再回来。</li>
+    <li>大改之前，心里有底：「改坏了也能回到任意一个历史点」。</li>
+  </ul>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"打开撤销树面板，敲什么？","options":[":UndotreeToggle",":Undo",":Tree",":Undotree"],"answer":0,"explain":":UndotreeToggle 打开/关闭面板。"},
+    {"q":"撤销历史是什么形状？","options":["树状（有分支）","一条直线","环形","网格"],"answer":0,"explain":"撤销是树：撤销后再编辑会产生分叉。"},
+    {"q":"面板里跳转到某个历史状态，按什么？","options":["Enter","Esc","u","q"],"answer":0,"explain":"j/k 移动，Enter 跳转。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <ol class="practice">
+    <li><code>v /tmp/test.txt</code>，<kbd>o</kbd> 打三行文字（<code>1</code>、<code>2</code>、<code>3</code>），每次打完 <kbd>Esc</kbd>。</li>
+    <li>按 <code>u</code> 撤销两次——退到只剩一行。</li>
+    <li>再按 <kbd>o</kbd> 打一行 <code>新分支</code>——你制造了一个分叉。</li>
+    <li>敲 <code>:UndotreeToggle</code>——看到树状历史，有主干和分叉。</li>
+    <li>按 <kbd>Ctrl</kbd>+<kbd>w</kbd> <kbd>h</kbd> 把光标切进 undotree 面板，然后 <kbd>j</kbd>/<kbd>k</kbd> 移动，<kbd>Enter</kbd> 跳到不同状态。</li>
+    <li>再敲 <code>:UndotreeToggle</code> 关闭。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>undotree 见 <a href="https://github.com/mbbill/undotree">mbbill/undotree</a>，或 vim 里 <code>:help undotree</code>。插件在 <a href="../vim/.vimrc">.vimrc</a> 第 53 行声明。上一课：<a href="0016-vim-surround.html">0016 · vim-surround</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

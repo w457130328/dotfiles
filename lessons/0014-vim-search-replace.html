@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0014 · vim 搜索与替换</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>vim 搜索与替换</h1>
+
+  <p>这一课学 vim 里最常用的两件事：<b>找一个词、换掉一批词</b>。全内置、不用插件。你的 <a href="../vim/.vimrc">.vimrc</a> 还开了两个好设置（第 8、15、16 行），让搜索更顺手。</p>
+
+  <h2>搜索</h2>
+  <p>在 normal 模式敲 <code>/</code>，后面跟要搜的词，<kbd>Enter</kbd>：</p>
+  <table>
+    <tr><th>命令</th><th>效果</th></tr>
+    <tr><td><code>/词</code></td><td>向下搜索，光标跳到第一个匹配</td></tr>
+    <tr><td><code>n</code></td><td>跳到<b>下一个</b>匹配</td></tr>
+    <tr><td><code>N</code></td><td>跳到<b>上一个</b>匹配</td></tr>
+  </table>
+  <p>你的配置开了 <b><code>incsearch</code>（增量搜索）</b>——敲 <code>/</code> 后边打字，光标就边跳边亮，不用等回车；还开了 <b><code>hlsearch</code></b>——搜完所有匹配都高亮。</p>
+
+  <h2>清除高亮</h2>
+  <p>搜完那一堆高亮还赖在屏幕上，很烦。你的配置第 204 行给了个键：<kbd>Ctrl</kbd>+<kbd>l</kbd> = 清除所有搜索高亮（等于 <code>:nohlsearch</code>）。<b>记住这个键</b>，每次搜完按一下。备用命令：敲 <code>:noh</code> 回车，效果一样。</p>
+
+  <h2>替换</h2>
+  <p>格式是 <code>:s/旧词/新词/</code>，前面加范围、结尾加标志：</p>
+  <table>
+    <tr><th>命令</th><th>效果</th></tr>
+    <tr><td><code>:s/旧/新/</code></td><td><b>当前行</b>第一个「旧」→「新」</td></tr>
+    <tr><td><code>:s/旧/新/g</code></td><td><b>当前行</b>所有「旧」→「新」</td></tr>
+    <tr><td><code>:%s/旧/新/g</code></td><td><b>全文</b>所有「旧」→「新」</td></tr>
+    <tr><td><code>:%s/旧/新/gc</code></td><td>全文替换，但<b>每个都问</b>你确认（y/n）</td></tr>
+  </table>
+  <p>记法：<code>%</code> = 全文（整个文件），<code>g</code> = 每一处（不只在行首），<code>c</code> = confirm（逐个确认）。</p>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"搜索一个词，敲什么？","options":["/词","?词","n","N"],"answer":0,"explain":"/词 向下搜索，Enter 确认。"},
+    {"q":"跳到下一个匹配，按什么？","options":["n","N","/","g"],"answer":0,"explain":"n 下一个，N 上一个。"},
+    {"q":"全文替换所有旧词为新词，敲什么？","options":[":%s/旧/新/g",":s/旧/新/g",":%s/旧/新/","/旧/新"],"answer":0,"explain":"% 全文，g 每一处。"},
+    {"q":"清除搜索高亮，按什么？","options":["Ctrl+l","Ctrl+s","Ctrl+g","Esc"],"answer":0,"explain":"Ctrl+l = :nohlsearch，清高亮。"},
+    {"q":"想替换全文但每个都确认，加什么标志？","options":["c","g","%","n"],"answer":0,"explain":"c = confirm，逐个确认。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <ol class="practice">
+    <li><code>v /tmp/test.txt</code>——打开文件。</li>
+    <li>按 <kbd>o</kbd> 进 insert，打一行 <code>foo bar foo bar foo</code>，<kbd>Esc</kbd> 回 normal。</li>
+    <li>敲 <code>/foo</code> <kbd>Enter</kbd>——光标跳到第一个 foo，所有 foo 高亮。</li>
+    <li>按 <code>n</code>、<code>n</code>——跳到下两个 foo；<code>N</code> 往回跳。</li>
+    <li>按 <kbd>Ctrl</kbd>+<kbd>l</kbd>——高亮消失。</li>
+    <li>敲 <code>:s/foo/bar/g</code> <kbd>Enter</kbd>——当前行所有 foo 变 bar。</li>
+    <li>按 <code>u</code> 撤销，再敲 <code>:%s/foo/bar/gc</code>——体验逐个确认（<code>y</code> 替换 / <code>n</code> 跳过）。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>搜索替换是 vim 内置，见 <code>:help /</code>、<code>:help :substitute</code>。你配置里的 <code>incsearch</code>/<code>hlsearch</code> 和 <code>Ctrl+l</code> 见 <a href="../vim/.vimrc">vim/.vimrc</a> 第 8、15、16、204 行。上一课：<a href="0013-vim-fzf.html">0013 · vim 导航（fzf）</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

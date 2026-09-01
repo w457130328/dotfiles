@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0015 · vim 编辑增强：移动行、粘贴模式、换行</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>vim 编辑增强：移动行、粘贴模式、换行</h1>
+
+  <p>三个日常编辑的小工具，都是这套配置绑好的（见 <a href="../vim/.vimrc">.vimrc</a> 第 131–153 行）。一次学三个，因为它们都简单。</p>
+
+  <h2>① 移动行：Ctrl+j / Ctrl+k（核心）</h2>
+  <table>
+    <tr><th>键</th><th>效果</th></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>j</kbd></td><td>当前行<b>下移</b>一行</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>k</kbd></td><td>当前行<b>上移</b>一行</td></tr>
+  </table>
+  <p>记法：<b>j=下、k=上</b>（和你熟的 <code>hjkl</code> 方向一致）。用途：调整代码 / 列表 / 文字的顺序，不用「剪切 → 移动光标 → 粘贴」三步，一行直接搬走。</p>
+  <p>三种模式都支持：<b>normal</b> 模式搬整行；<b>visual</b> 模式选中多行一起搬；<b>insert</b> 模式也能搬（会闪一下切到 normal 再回来，正常）。</p>
+
+  <h2>② 粘贴模式：Ctrl+p</h2>
+  <p><kbd>Ctrl</kbd>+<kbd>p</kbd> = 切换 <b>paste 模式</b>（<code>:set paste!</code>）。什么时候用：从浏览器 / 别处<b>粘贴一大段缩进好的代码</b>时，vim 的自动缩进会把内容越缩越深、乱成一团。按一下 <kbd>Ctrl</kbd>+<kbd>p</kbd> 进 paste 模式再粘贴，就原样保留；贴完再按一下切回来。</p>
+
+  <h2>③ 换行：空格+w</h2>
+  <p><kbd>空格</kbd>+<kbd>w</kbd> = 切换<b>自动换行</b>（<code>:set wrap!</code>）。你的配置默认 <code>nowrap</code>（不换行，长行会超出屏幕）。看长文档 / 长文章时按一下让它换行，写代码时再按一下关掉。</p>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"把当前行下移一行，按什么？","options":["Ctrl+j","Ctrl+k","Ctrl+p","空格+w"],"answer":0,"explain":"Ctrl+j 下移，Ctrl+k 上移。"},
+    {"q":"把当前行上移一行，按什么？","options":["Ctrl+k","Ctrl+j","Ctrl+p","Ctrl+l"],"answer":0,"explain":"k=上，Ctrl+k 上移。"},
+    {"q":"粘贴代码防止缩进乱掉，按什么？","options":["Ctrl+p","空格+w","Ctrl+j","Ctrl+k"],"answer":0,"explain":"Ctrl+p 切换 paste 模式。"},
+    {"q":"切换自动换行，按什么？","options":["空格+w","Ctrl+w","Ctrl+p","空格+p"],"answer":0,"explain":"空格+w = :set wrap!。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <ol class="practice">
+    <li><code>v /tmp/test.txt</code>——打开文件，用 <kbd>o</kbd> 打三行：<code>aaa</code>、<code>bbb</code>、<code>ccc</code>（各一行）。</li>
+    <li>光标停在 <code>aaa</code>，按 <kbd>Ctrl</kbd>+<kbd>j</kbd>——它下移；按 <kbd>Ctrl</kbd>+<kbd>k</kbd>——它又上移。</li>
+    <li>按 <kbd>V</kbd> 进 visual 选中两行，<kbd>Ctrl</kbd>+<kbd>j</kbd>——两行一起下移。</li>
+    <li>按 <kbd>Ctrl</kbd>+<kbd>p</kbd> 切 paste 模式，从别处粘贴一段代码，再 <kbd>Ctrl</kbd>+<kbd>p</kbd> 切回。</li>
+    <li>按 <kbd>空格</kbd>+<kbd>w</kbd>——观察长行换行；再按一次——恢复。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>这三个映射见 <a href="../vim/.vimrc">vim/.vimrc</a> 第 131–136（移动行）、151（paste）、153（换行）。上一课：<a href="0014-vim-search-replace.html">0014 · vim 搜索与替换</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

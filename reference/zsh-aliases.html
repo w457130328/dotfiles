@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>zsh 别名速查表</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>zsh 别名速查表</h1>
+  <p>来源：<code>zsh/.aliases</code>。打印出来贴桌上，用于间隔复习。三类别名：<b>全局</b>（<code>alias -g</code>，命令任意位置）、<b>普通</b>（<code>alias</code>，命令开头）、<b>后缀</b>（<code>alias -s</code>，按文件后缀）。</p>
+
+  <h2>全局别名：管道后缀（0006 已学）</h2>
+  <table>
+    <tr><th>别名</th><th>展开成</th><th>用途</th></tr>
+    <tr><td><code>L</code></td><td><code>| less</code></td><td>分页</td></tr>
+    <tr><td><code>H</code></td><td><code>| head</code></td><td>开头几行</td></tr>
+    <tr><td><code>H2</code></td><td><code>| head -n 20</code></td><td>前 20 行</td></tr>
+    <tr><td><code>G</code></td><td><code>| grep</code></td><td>过滤</td></tr>
+    <tr><td><code>Gi</code></td><td><code>| grep -i</code></td><td>忽略大小写过滤</td></tr>
+    <tr><td><code>GH</code></td><td><code>| grep HTTP</code></td><td>过滤 HTTP 行</td></tr>
+    <tr><td><code>C</code></td><td><code>| clipcopy</code></td><td>复制到剪贴板</td></tr>
+    <tr><td><code>A1</code></td><td><code>| awk '{print $1}'</code></td><td>取第一列</td></tr>
+    <tr><td><code>X</code></td><td><code>| xargs -I@</code></td><td>逐项传参</td></tr>
+    <tr><td><code>Fj</code></td><td><code>| jq .</code></td><td>JSON 格式化</td></tr>
+    <tr><td><code>Fy</code></td><td><code>| yq .</code></td><td>YAML 格式化</td></tr>
+    <tr><td><code>Fx</code></td><td><code>| xmllint --format -</code></td><td>XML 格式化</td></tr>
+    <tr><td><code>V</code></td><td><code>| vim -</code></td><td>结果送进 vim</td></tr>
+  </table>
+
+  <h2>普通别名：命令开头（0008 已学）</h2>
+  <table>
+    <tr><th>别名</th><th>展开成</th><th>用途</th></tr>
+    <tr><td><code>c</code></td><td><code>cat</code></td><td>看文件</td></tr>
+    <tr><td><code>v</code></td><td><code>vim</code></td><td>编辑</td></tr>
+    <tr><td><code>v.</code></td><td><code>vim .</code></td><td>打开当前目录</td></tr>
+    <tr><td><code>le</code></td><td><code>less -j4</code></td><td>分页</td></tr>
+    <tr><td><code>sz</code></td><td><code>source ~/.zshrc</code></td><td>重载配置</td></tr>
+    <tr><td><code>h</code></td><td><code>hash -rf</code></td><td>清命令缓存</td></tr>
+  </table>
+
+  <h2>后缀别名：按文件后缀（0008 已学）</h2>
+  <p>⚠️ 图形打开类（pdf/png/html/mp4/办公文档）因程序未装<b>失效</b>；<b>只有命令行查看类能用</b>：</p>
+  <table>
+    <tr><th>后缀</th><th>实际执行</th><th>状态</th></tr>
+    <tr><td><code>jar</code></td><td><code>java -jar</code></td><td>✓ 可用</td></tr>
+    <tr><td><code>zip / war</code></td><td><code>unzip -l</code>（列清单）</td><td>✓ 可用</td></tr>
+    <tr><td><code>gz / tgz</code></td><td><code>tar -tf</code>（列清单）</td><td>✓ 可用</td></tr>
+    <tr><td><code>pdf</code></td><td><code>background mupdf</code></td><td>✗ mupdf 未装</td></tr>
+    <tr><td><code>png / jpg</code></td><td><code>background gpicview</code></td><td>✗ gpicview 未装</td></tr>
+    <tr><td><code>mp4 / mkv</code></td><td><code>background vlc</code></td><td>✗ vlc 未装</td></tr>
+    <tr><td><code>html</code></td><td><code>background chromium</code></td><td>✗ chromium 未装</td></tr>
+    <tr><td>办公文档</td><td><code>background libreoffice</code></td><td>✗ libreoffice 未装</td></tr>
+  </table>
+
+  <h2>快捷键（bindkey，0007 已学）</h2>
+  <table>
+    <tr><th>按键</th><th>效果</th></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>K</kbd></td><td>清屏 + <code>exa -al</code></td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>J</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd></td><td>清屏 + 目录树 2 / 3 层</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>T</kbd> / <kbd>Esc</kbd> 再 <kbd>Ctrl</kbd>+<kbd>T</kbd></td><td>插入日期 / Unix 时间戳</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>G</kbd></td><td>清屏 + <code>git status</code></td></tr>
+  </table>
+
+  <p>完整别名见 <a href="../zsh/.aliases">zsh/.aliases</a>；快捷键定义见 <a href="../zsh/oh-my-zsh-custom/custom/shortcuts.zsh">shortcuts.zsh</a>。</p>
+
+</body>
+</html>

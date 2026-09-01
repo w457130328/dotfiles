@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0010 · vim 基础：模式、移动、保存退出</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>vim 基础：模式、移动、保存退出</h1>
+
+  <p>从这一课起进入 vim——三块里最需要「肌肉记忆」的一块。你的 vim 是 Daschner 的 <a href="../vim/.vimrc">.vimrc</a> 配好的。第一课只解决一件事：<b>能进 vim、能移动光标、能改字、能保存、能退出</b>。这几样会了，后面所有高级键才有地基。</p>
+
+  <h2>地基一：两种模式</h2>
+  <p>vim 和普通编辑器最大的区别——它有「模式」。理解不了这个，其他全白搭：</p>
+  <table>
+    <tr><th>模式</th><th>此时敲键是</th><th>怎么进去</th></tr>
+    <tr><td><b>normal（普通）</b></td><td><b>命令</b>（移动、删除、退出…）</td><td>按 <kbd>Esc</kbd></td></tr>
+    <tr><td><b>insert（插入）</b></td><td><b>文字</b>（正常打字）</td><td>按 <kbd>i</kbd> / <kbd>a</kbd> / <kbd>o</kbd></td></tr>
+  </table>
+  <p>vim <b>打开时默认在 normal 模式</b>——所以你会遇到「敲字没反应、还哔哔叫」，那是你在 normal 模式下把字母当命令了。想打字，先按 <kbd>i</kbd>。</p>
+
+  <h2>地基二：移动光标（手不离键盘）</h2>
+  <p>在 normal 模式下，用这四个键移动，不用方向键（方向键又慢又要手离开主键盘区）：</p>
+  <pre><code>      k        上
+  h ←  → l     h=左  l=右
+      j        下</code></pre>
+  <p>和 i3 的 <code>hjkl</code> 是同一套，你已经会了。</p>
+
+  <h2>地基三：保存与退出（这套配置给你的快捷键）</h2>
+  <p>你的 <code>.vimrc</code> 第 190–191 行把保存/退出绑到了两个超好记的键：</p>
+  <table>
+    <tr><th>按键</th><th>效果</th></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>s</kbd></td><td>保存（<code>:w</code>）</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>q</kbd></td><td>退出（<code>:q</code>）</td></tr>
+  </table>
+  <p>备用标准命令（记不住 Ctrl 组合时用）：<code>:w</code> 保存、<code>:q</code> 退出、<code>:wq</code> 保存并退出、<code>:q!</code> 放弃改动强行退出。</p>
+  <p><b>小提醒</b>：万一 <kbd>Ctrl</kbd>+<kbd>s</kbd> 让屏幕「冻住」了（个别终端的流控制问题），按 <kbd>Ctrl</kbd>+<kbd>q</kbd> 解冻，改用 <code>:w</code> 保存即可。alacritty 一般不会，但你知道这个兜底。</p>
+
+  <h2>预告：leader = 空格键</h2>
+  <p>这套配置最核心的一个设定（<code>.vimrc</code> 第 105 行 <code>let mapleader = "\&lt;Space&gt;"</code>）：<b>leader 键是空格</b>。后面你会看到一大堆 <code>空格+xx</code> 的快捷键——找文件、切 buffer、复制到系统剪贴板，全都挂在空格上。现在先记住「空格是总开关」，下一课开始逐个讲。</p>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"vim 打开后默认在什么模式？","options":["normal 模式","insert 模式","visual 模式","命令模式"],"answer":0,"explain":"默认 normal 模式，敲键是命令，不是打字。"},
+    {"q":"想开始打字，按什么？","options":["i","Esc","q","s"],"answer":0,"explain":"i 进入 insert 模式，开始输入文字。"},
+    {"q":"normal 模式下光标向左移，按什么？","options":["h","j","k","l"],"answer":0,"explain":"h=左，j=下，k=上，l=右。"},
+    {"q":"这套配置里保存文件，按什么？","options":["Ctrl+s","Ctrl+q","Ctrl+w","Esc"],"answer":0,"explain":"Ctrl+s = :w 保存；Ctrl+q = :q 退出。"},
+    {"q":"这套配置的 leader 键是什么？","options":["空格","回车","Ctrl","Tab"],"answer":0,"explain":"let mapleader = 空格，所有自定义键挂在空格上。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <ol class="practice">
+    <li>敲 <code>v /tmp/test.txt</code>——用别名打开 vim，进入 normal 模式。</li>
+    <li>按 <kbd>i</kbd>——进入 insert 模式，打几行字。</li>
+    <li>按 <kbd>Esc</kbd>——回到 normal 模式。</li>
+    <li>用 <kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd> 移动光标，体会「手不离开键盘」。</li>
+    <li>按 <kbd>Ctrl</kbd>+<kbd>s</kbd>——保存，左下角看到 <code>"/tmp/test.txt" written</code>。</li>
+    <li>按 <kbd>Ctrl</kbd>+<kbd>q</kbd>——退出 vim。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>这些键位以 <a href="../vim/.vimrc">vim/.vimrc</a> 为准。vim 官方教程 <code>:help</code> 或终端里跑 <code>vimtutor</code> 是最权威的入门练习。上一课：<a href="0009-git-aliases.html">0009 · git 别名</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

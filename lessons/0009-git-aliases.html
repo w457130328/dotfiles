@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0009 · git 别名</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>git 别名</h1>
+
+  <p>这一课学你最该记住的一组缩写——git。它们来自 oh-my-zsh 的 git 插件（你的 <a href="../zsh/.zshrc">.zshrc</a> 第 74 行 <code>plugins=(git)</code> 已加载），所以这些 <code>g</code> 开头的缩写<b>开箱即用</b>，不用改配置。你在 <code>dotfiles</code> 这个 git 仓库里直接就能练。</p>
+
+  <h2>高频 8 个（记住就够用了）</h2>
+  <table>
+    <tr><th>别名</th><th>展开成</th><th>做什么</th></tr>
+    <tr><td><code>gst</code></td><td><code>git status</code></td><td>看状态（有改动吗）</td></tr>
+    <tr><td><code>gss</code></td><td><code>git status --short</code></td><td>状态，一行一文件</td></tr>
+    <tr><td><code>ga</code></td><td><code>git add</code></td><td>暂存文件</td></tr>
+    <tr><td><code>gaa</code></td><td><code>git add --all</code></td><td>暂存全部</td></tr>
+    <tr><td><code>gcmsg</code></td><td><code>git commit -m</code></td><td>提交（带消息）</td></tr>
+    <tr><td><code>gco</code></td><td><code>git checkout</code></td><td>切分支 / 恢复文件</td></tr>
+    <tr><td><code>gb</code></td><td><code>git branch</code></td><td>列分支</td></tr>
+    <tr><td><code>gd</code></td><td><code>git diff</code></td><td>看改动差异</td></tr>
+  </table>
+  <p>另有 <code>gp</code>（push）、<code>gl</code>（pull）、<code>gcob</code>（checkout -b 建新分支）也常用，用到再记。</p>
+
+  <h2>⚠️ 两个必踩的坑</h2>
+  <p>这俩是新手最容易搞混的，因为「看着像」：</p>
+  <ul>
+    <li><b><code>gcm</code> 不是 commit！</b>它展开是 <code>git checkout $(git_main_branch)</code>——切回主分支。提交是 <code>gcmsg</code>（commit -m）。别在 <code>gcm</code> 后面跟提交消息，那是错的。</li>
+    <li><b><code>gs</code> 不是 status！</b>你的配置里 <code>gs</code> = <code>git show</code>（看某个提交），看状态是 <code>gst</code>。这是你 <a href="../zsh/.aliases">.aliases</a> 第 99 行自定义的，覆盖了直觉。</li>
+  </ul>
+  <p>一句话口诀：<b>提交用 <code>gcmsg</code>，状态用 <code>gst</code>，主分支用 <code>gcm</code></b>。</p>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"想看当前仓库有没有改动，敲什么？","options":["gst","gs","gcm","gb"],"answer":0,"explain":"gst = git status，看状态。"},
+    {"q":"想提交并带消息，敲什么？","options":["gcmsg","gcm","gs","gss"],"answer":0,"explain":"gcmsg = git commit -m。"},
+    {"q":"gcm 实际执行什么？","options":["切回主分支","提交改动","显示状态","暂存全部"],"answer":0,"explain":"gcm = git checkout 主分支，不是 commit！"},
+    {"q":"想暂存所有改动，敲什么？","options":["gaa","ga","gd","gb"],"answer":0,"explain":"gaa = git add --all。"},
+    {"q":"想看改动差异，敲什么？","options":["gd","gst","gb","gp"],"answer":0,"explain":"gd = git diff。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <p>就在 <code>dotfiles</code> 仓库里，敲下面这些<b>只读</b>命令（不会改任何东西，放心）：</p>
+  <ol class="practice">
+    <li><code>gst</code>——看到当前有修改的文件（你之前改过 i3/vim/zsh 等）。</li>
+    <li><code>gss</code>——同样的状态，但一行一个文件，更紧凑。</li>
+    <li><code>gd</code>——看具体改了什么（<kbd>q</kbd> 退出 diff 分页）。</li>
+    <li><code>gb</code>——列出所有分支。</li>
+    <li><code>gcm</code>——切回主分支（当前应该就在 master，会提示 already）。体会一下它不是 commit。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>这些别名是 oh-my-zsh git 插件的默认定义，完整列表见 <a href="https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/git">oh-my-zsh git 插件</a>。你自定义的 git 别名见 <a href="../zsh/.aliases">zsh/.aliases</a> 第 99–116 行。上一课：<a href="0008-suffix-and-normal-aliases.html">0008 · 普通别名与后缀别名</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

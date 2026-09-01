@@ -1,6 +1,7 @@
 set $mod Mod4
 
 exec --no-startup-id nitrogen --restore
+exec --no-startup-id fcitx5 -d
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
@@ -208,7 +209,7 @@ bar {
         urgent_workspace   #ff0000 #880000 #ffffff
         binding_mode       #ff0000 #880000 #ffffff
     }
-        status_command i3status --config ~/.config/i3status.conf
+        status_command i3status --config ~/.config/i3status.conf | ~/.config/i3status/bluetooth.py
         tray_output primary
 }
 

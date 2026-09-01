@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0003 · 把窗口搬去别的工作区</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>把窗口搬去别的工作区</h1>
+
+  <p>第一课你会「去」工作区（<kbd>Mod</kbd>+<kbd>1</kbd>…<kbd>0</kbd>），这一课学「带着窗口一起走」——把窗口搬到别的工作区。学完你就能真正用工作区把任务分开：工作区 1 写代码，工作区 2 看网页，窗口随时搬。</p>
+
+  <h2>三个动作，一个都不能混</h2>
+  <p>工作区相关的键容易混，因为都是「Ctrl / Shift / 数字」的组合。核心是分清<b>「你」和「窗口」谁在动</b>：</p>
+
+  <table>
+    <tr><th>动作</th><th>按键</th><th>谁动</th></tr>
+    <tr><td>切到工作区 N</td><td><kbd>Mod</kbd>+<kbd>1</kbd>…<kbd>0</kbd></td><td>你过去，窗口留在原地</td></tr>
+    <tr><td>切到上/下一个工作区</td><td><kbd>Mod</kbd>+<kbd>Ctrl</kbd>+<kbd>h</kbd> / <kbd>l</kbd></td><td>你过去，窗口留在原地</td></tr>
+    <tr><td>把焦点窗口搬到工作区 N</td><td><kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd>…<kbd>0</kbd></td><td>窗口过去，你留在原地</td></tr>
+    <tr><td>把窗口搬到上/下个工作区，并跟过去</td><td><kbd>Mod</kbd>+<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>h</kbd> / <kbd>l</kbd></td><td>窗口和你一起过去</td></tr>
+  </table>
+
+  <p><b>记法</b>：加 <kbd>Shift</kbd> = 搬窗口；加 <kbd>Ctrl</kbd> = 上/下一个（而不是指定编号）；两者都加 = 搬窗口 + 跟过去。<kbd>Mod</kbd>+<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>h</kbd>/<kbd>l</kbd> 是最实用的「连人带窗一起走」（<a href="../config/i3/config">config</a> 第 143–144 行）。</p>
+
+  <h2>附赠：全屏</h2>
+  <table>
+    <tr><th>操作</th><th>按键</th></tr>
+    <tr><td>全屏切换</td><td><kbd>Mod</kbd>+<kbd>f</kbd></td></tr>
+  </table>
+  <p>看视频、写代码想独占屏幕时用。再按一次恢复。</p>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"把焦点窗口搬到工作区 3（自己留在原地），按什么？","options":["Mod+Shift+3","Mod+3","Mod+Ctrl+3","Mod+Ctrl+Shift+3"],"answer":0,"explain":"Shift+数字 = 搬窗口到指定工作区，自己不跟过去。"},
+    {"q":"切到上一个工作区（不搬窗口），按什么？","options":["Mod+Ctrl+h","Mod+Ctrl+l","Mod+Ctrl+Shift+h","Mod+Ctrl+Shift+l"],"answer":0,"explain":"Ctrl+h/l = 上/下一个工作区；h 是上一个，l 是下一个。"},
+    {"q":"把窗口搬到下一个工作区并跟着过去，按什么？","options":["Mod+Ctrl+h","Mod+Ctrl+l","Mod+Ctrl+Shift+h","Mod+Ctrl+Shift+l"],"answer":3,"explain":"Ctrl+Shift+l = 搬窗口到下一个工作区并跟随；l 是下一个。"},
+    {"q":"切换到工作区 7，按什么？","options":["Mod+7","Mod+Shift+7","Mod+Ctrl+7","Mod+Ctrl+Shift+7"],"answer":0,"explain":"切工作区就 Mod+数字；Shift 是搬窗口，Ctrl 是上/下一个。"},
+    {"q":"全屏切换，按什么？","options":["Mod+f","Mod+w","Mod+s","Mod+q"],"answer":0,"explain":"f = fullscreen。再按一次恢复。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <ol class="practice">
+    <li>在工作区 1 开两个终端，再按 <kbd>Mod</kbd>+<kbd>2</kbd> 切到空白工作区 2，开一个浏览器（<kbd>Mod</kbd>+<kbd>Alt</kbd>+<kbd>1</kbd>）。</li>
+    <li>回到工作区 1，对某个终端按 <kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>2</kbd>——确认它被搬走、而你还留在工作区 1。</li>
+    <li>对另一个终端按 <kbd>Mod</kbd>+<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>l</kbd>——你会和窗口一起跳到下一个工作区。</li>
+    <li>用 <kbd>Mod</kbd>+<kbd>Ctrl</kbd>+<kbd>h</kbd> / <kbd>l</kbd> 在两个工作区之间来回切几次。</li>
+    <li>随便挑个窗口按 <kbd>Mod</kbd>+<kbd>f</kbd> 全屏，再按一次恢复。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>工作区的权威讲解见 <a href="https://i3wm.org/docs/userguide.html">i3 官方用户指南</a>「Using workspaces」。键位以 <a href="../config/i3/config">config/i3/config</a> 第 117–144 行为准；速查打印版见 <a href="../reference/i3-keys.html">i3 核心键位速查表</a>。上一课：<a href="0002-move-and-split.html">0002 · 移动窗口与分屏</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>下一步：<a href="0004-resize-and-float.html">0004 · 调整大小与浮动窗口</a>。有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0011 · vim 编辑：插入、删除、撤销、复制粘贴</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>vim 编辑：插入、删除、撤销、复制粘贴</h1>
+
+  <p>上一课你会进、会动、会存、会退了。这一课学会<b>改内容</b>——这是编辑文件的最小闭环。所有操作都在 <b>normal 模式</b>下敲（除了插入）。</p>
+
+  <h2>插入：四种位置</h2>
+  <table>
+    <tr><th>键</th><th>在哪里开始打字</th></tr>
+    <tr><td><code>i</code></td><td>光标<b>前</b></td></tr>
+    <tr><td><code>a</code></td><td>光标<b>后</b></td></tr>
+    <tr><td><code>o</code></td><td><b>下面</b>新开一行</td></tr>
+    <tr><td><code>O</code></td><td><b>上面</b>新开一行</td></tr>
+  </table>
+  <p><b>你这套配置的映射</b>（<a href="../vim/.vimrc">.vimrc</a> 第 107–108 行）：normal 模式下按 <kbd>Enter</kbd> = <code>o</code> 后立刻 <kbd>Esc</kbd>——下面开新行，但<b>停在 normal 模式</b>（不进入 insert）。所以想「开行 + 直接打字」用 <code>o</code>；想「开行 + 停在 normal」敲回车。</p>
+  <p><b>注意</b>：配置文件还写了 <code>nmap &lt;S-Enter&gt; O&lt;Esc&gt;</code>（上方开新行），但<b>在终端里触发不了</b>——终端把 <kbd>Shift</kbd>+<kbd>Enter</kbd> 和 <kbd>Enter</kbd> 当同一个键发送，vim 无法区分，两者都走 <code>&lt;CR&gt;</code> 这条（下面开新行）。上方开新行请用 <code>O</code>。</p>
+
+  <h2>删除</h2>
+  <table>
+    <tr><th>键</th><th>删什么</th></tr>
+    <tr><td><code>x</code></td><td>光标处的<b>一个字符</b></td></tr>
+    <tr><td><code>dd</code></td><td>光标所在的<b>整行</b></td></tr>
+  </table>
+  <p>规律：连按两次的（<code>dd</code>）作用在「行」上；单个的（<code>x</code>）作用在「字符」上。</p>
+
+  <h2>撤销与重做</h2>
+  <table>
+    <tr><th>键</th><th>效果</th></tr>
+    <tr><td><code>u</code></td><td>撤销上一步</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>r</kbd></td><td>重做（撤销的撤销）</td></tr>
+  </table>
+  <p>新手最安心的两个键——改错了按 <code>u</code> 就行，vim 能撤销很多很多步。</p>
+
+  <h2>复制粘贴</h2>
+  <table>
+    <tr><th>键</th><th>效果</th></tr>
+    <tr><td><code>yy</code></td><td>复制（yank）整行</td></tr>
+    <tr><td><code>p</code></td><td>粘贴到光标<b>下方</b></td></tr>
+    <tr><td><code>P</code></td><td>粘贴到光标<b>上方</b></td></tr>
+  </table>
+  <p><code>dd</code> 删掉的行也会进剪贴板——所以「剪切一行」= <code>dd</code> 再 <code>p</code>。巧的是 <code>yy</code>（复制）和 <code>dd</code>（删除）就差一个字母，很好记。</p>
+
+  <h2>快速移动（配合编辑用）</h2>
+  <table>
+    <tr><th>键</th><th>移到</th></tr>
+    <tr><td><code>w</code> / <code>b</code></td><td>下一个 / 上一个单词</td></tr>
+    <tr><td><code>0</code> / <code>$</code></td><td>行首 / 行尾</td></tr>
+    <tr><td><code>gg</code> / <code>G</code></td><td>文件开头 / 结尾</td></tr>
+  </table>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"光标后开始打字，按什么？","options":["a","i","o","O"],"answer":0,"explain":"a = append，光标后插入；i 是光标前。"},
+    {"q":"下面新开一行，按什么？","options":["o","O","i","a"],"answer":0,"explain":"o = 下方新开行；O 是上方。回车也行（你的配置）。"},
+    {"q":"删除整行，按什么？","options":["dd","x","u","p"],"answer":0,"explain":"dd 删除整行，x 删一个字符。"},
+    {"q":"撤销上一步，按什么？","options":["u","r","x","p"],"answer":0,"explain":"u = undo；Ctrl+r 是重做。"},
+    {"q":"复制整行，按什么？","options":["yy","dd","p","xx"],"answer":0,"explain":"yy = yank 复制行，p 粘贴。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <ol class="practice">
+    <li><code>v /tmp/test.txt</code>——打开昨天的文件。</li>
+    <li>按 <kbd>o</kbd>——下面新开一行并进入 insert，打一句话，<kbd>Esc</kbd> 回来。（注意：直接按 <kbd>Enter</kbd> 只开行、<b>不</b>进入 insert。）</li>
+    <li>按 <code>dd</code>——删掉这一行；按 <code>u</code>——撤销，行回来了。</li>
+    <li>按 <code>yy</code> 然后 <code>p</code>——复制并粘贴一行，看到多出一行。</li>
+    <li>按 <code>x</code>——删掉光标处一个字符。</li>
+    <li>用 <code>w</code> / <code>0</code> / <code>$</code> / <code>gg</code> / <code>G</code> 快速移动光标。</li>
+    <li><kbd>Ctrl</kbd>+<kbd>s</kbd> 保存，<kbd>Ctrl</kbd>+<kbd>q</kbd> 退出。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>这些是 vim 通用操作，最权威的练习是终端里跑 <code>vimtutor</code>（官方 30 分钟教程）。你配置里的特殊映射（回车开新行）见 <a href="../vim/.vimrc">vim/.vimrc</a>。上一课：<a href="0010-vim-basics.html">0010 · vim 基础</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

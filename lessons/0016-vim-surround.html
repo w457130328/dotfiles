@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0016 · vim-surround：改引号、加括号</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>vim-surround：改引号、加括号</h1>
+
+  <p>这一课学 tpope 的 <b>vim-surround</b> 插件——解决一个超高频需求：<b>给文字加/删/换「环绕符」</b>（引号、括号、HTML 标签）。比如把 <code>"foo"</code> 改成 <code>'foo'</code>，或给 <code>foo</code> 套上 <code>(foo)</code>。插件已加载，直接能用。</p>
+
+  <h2>三个命令</h2>
+  <table>
+    <tr><th>命令</th><th>含义</th><th>例子</th><th>结果</th></tr>
+    <tr><td><code>cs</code></td><td><b>c</b>hange <b>s</b>urround 换环绕</td><td><code>cs"'</code></td><td><code>"foo"</code> → <code>'foo'</code></td></tr>
+    <tr><td><code>ds</code></td><td><b>d</b>elete <b>s</b>urround 删环绕</td><td><code>ds"</code></td><td><code>"foo"</code> → <code>foo</code></td></tr>
+    <tr><td><code>ys</code></td><td><b>y</b>ou <b>s</b>urround 加环绕</td><td><code>ysiw"</code></td><td><code>foo</code> → <code>"foo"</code></td></tr>
+  </table>
+  <p>用法：光标停在 <b>环绕符之间的文字上</b>（比如 <code>"foo"</code> 的 <code>foo</code> 上），再敲命令。</p>
+
+  <h2>⚠️ 括号的开闭有大区别</h2>
+  <p>这是最容易踩的坑——左括号和右括号效果不同：</p>
+  <table>
+    <tr><th>你敲</th><th>结果</th></tr>
+    <tr><td><code>ysiw(</code></td><td><code>( foo )</code>（<b>带空格</b>）</td></tr>
+    <tr><td><code>ysiw)</code></td><td><code>(foo)</code>（<b>不带空格</b>）</td></tr>
+  </table>
+  <p>记法：<b>左括号 = 留空间，右括号 = 贴紧</b>。<code>[ ]</code>、<code>{ }</code> 同理。</p>
+
+  <h2>几个真实例子</h2>
+  <ul>
+    <li><code>cs"'</code>——双引号换单引号（写 Python 时常用）。</li>
+    <li><code>cst"</code>——把 HTML 标签换成引号（<code>t</code> 代表标签）。</li>
+    <li><code>ysiw)</code>——给光标处的词套上括号，如 <code>foo</code> → <code>(foo)</code>。</li>
+    <li><code>ds(</code>——去掉括号（连里面的空格一起清掉）。</li>
+    <li><code>yss"</code>——给整行加引号（<code>ss</code> = 整行）。</li>
+  </ul>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"把双引号换成单引号，敲什么？","options":["cs\"'","ds\"","ysiw\"","cs'"],"answer":0,"explain":"cs 换环绕：cs\"' 双引号→单引号。"},
+    {"q":"删掉文字外的双引号，敲什么？","options":["ds\"","cs\"'","ysiw\"","cst"],"answer":0,"explain":"ds 删环绕。"},
+    {"q":"给光标处的词加括号，敲什么？","options":["ysiw)","ds(","cs)(","yss)"],"answer":0,"explain":"ys 加环绕，iw = 当前词。"},
+    {"q":"想要 (foo) 而不是 ( foo )，敲左还是右括号？","options":["右括号 )","左括号 (","都一样","都不对"],"answer":0,"explain":"左=带空格，右=贴紧。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <ol class="practice">
+    <li><code>v /tmp/test.txt</code>，按 <kbd>o</kbd> 打一行：<code>"hello world"</code>，<kbd>Esc</kbd> 回 normal。</li>
+    <li>光标停在引号内的文字上，按 <code>cs"'</code>——双引号变单引号。</li>
+    <li>按 <code>ds'</code>——单引号消失。</li>
+    <li>光标停在 <code>hello</code> 上，按 <code>ysiw)</code>——变成 <code>(hello)</code>。</li>
+    <li>按 <code>cs]</code> 或 <code>cs(</code> 试试换别的括号，体会左/右的区别。</li>
+    <li>按 <code>ds(</code>——括号没了。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>vim-surround 权威文档见 <a href="https://github.com/tpope/vim-surround">tpope/vim-surround</a>，或 vim 里 <code>:help surround</code>。插件在 <a href="../vim/.vimrc">.vimrc</a> 第 51 行声明。上一课：<a href="0015-vim-misc-editing.html">0015 · vim 编辑增强</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0019 · vim 收尾：保存退出 + 方向键导航</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>vim 收尾：保存退出 + 方向键导航</h1>
+
+  <p>这课收三个高频小工具：<b>保存/退出</b>的快捷键、<b>方向键</b>（这套配置把它改成了导航）、<b>翻半页</b>。都是日常肌肉记忆的一部分。</p>
+
+  <h2>① 保存 / 退出</h2>
+  <table>
+    <tr><th>键</th><th>效果</th></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>s</kbd></td><td>保存（<code>:w</code>）</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>q</kbd></td><td>退出（<code>:q</code>）</td></tr>
+  </table>
+  <p>比敲 <code>:w</code> / <code>:q</code> 快。改完文件顺手 <kbd>Ctrl</kbd>+<kbd>s</kbd> 一下。</p>
+
+  <h2>② 方向键 = 导航（这套配置的特色）</h2>
+  <p>在 <b>normal</b> 模式，你的方向键被重新定义了：</p>
+  <table>
+    <tr><th>键</th><th>效果</th></tr>
+    <tr><td><kbd>↑</kbd></td><td>向上滚一行（看上面的内容）</td></tr>
+    <tr><td><kbd>↓</kbd></td><td>向下滚一行（看下面的内容）</td></tr>
+    <tr><td><kbd>←</kbd></td><td><b>上一个</b> buffer（<code>:bp</code>）</td></tr>
+    <tr><td><kbd>→</kbd></td><td><b>下一个</b> buffer（<code>:bn</code>）</td></tr>
+  </table>
+  <p>记法：<b>左右切文件，上下滚屏幕</b>。配合你熟悉的 <code>hjkl</code> 移动光标——方向键和 hjkl 各司其职，互不冲突。</p>
+  <p class="note">insert 模式下方向键行为不同：↑↓ 会复制上/下一行同列的字符，←→ 被禁用（等于没反应）。想移动光标请回 normal 用 hjkl。</p>
+
+  <h2>③ 翻半页：空格+d / 空格+u</h2>
+  <table>
+    <tr><th>键</th><th>效果</th></tr>
+    <tr><td><kbd>空格</kbd>+<kbd>d</kbd></td><td>向下翻半页（<code>C-d</code>）</td></tr>
+    <tr><td><kbd>空格</kbd>+<kbd>u</kbd></td><td>向上翻半页（<code>C-u</code>）</td></tr>
+  </table>
+  <p>记法延续 <code>hjkl</code> 的思路：<b>d = down、u = up</b>。看长文件时快速浏览。</p>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"保存当前文件，按什么？","options":["Ctrl+s","Ctrl+q","Ctrl+w",":w"],"answer":0,"explain":"Ctrl+s = :w 保存。"},
+    {"q":"退出 vim，按什么？","options":["Ctrl+q","Ctrl+s","Ctrl+x","Esc"],"answer":0,"explain":"Ctrl+q = :q 退出。"},
+    {"q":"normal 模式按 → 方向键，做什么？","options":["切到下一个 buffer","向右移动光标","向右滚动","无反应"],"answer":0,"explain":"→ = :bn，下一个 buffer。"},
+    {"q":"normal 模式按 ↑，做什么？","options":["向上滚一行","光标上移","上一个 buffer","无反应"],"answer":0,"explain":"↑ = C-y，向上滚动。"},
+    {"q":"向下翻半页，按什么？","options":["空格+d","空格+u","Ctrl+j","空格+w"],"answer":0,"explain":"d=down，空格+d 下翻半页。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <ol class="practice">
+    <li><code>v /tmp/a.txt /tmp/b.txt</code>——一次开两个文件。</li>
+    <li>按 <kbd>→</kbd>——切到第二个 buffer（b.txt）；按 <kbd>←</kbd>——切回第一个。</li>
+    <li>打开个长文件，按 <kbd>↓</kbd>、<kbd>↑</kbd>——上下滚动，光标不动。</li>
+    <li>按 <kbd>空格</kbd>+<kbd>d</kbd>、<kbd>空格</kbd>+<kbd>u</kbd>——翻半页。</li>
+    <li>随便改点东西，按 <kbd>Ctrl</kbd>+<kbd>s</kbd> 保存，最后 <kbd>Ctrl</kbd>+<kbd>q</kbd> 退出。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>这些映射见 <a href="../vim/.vimrc">.vimrc</a>：保存退出第 190–191 行，方向键第 110–119 行，翻页第 184–187 行。上一课：<a href="0018-vim-ultisnips.html">0018 · UltiSnips</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

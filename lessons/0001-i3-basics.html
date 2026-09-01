@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0001 · i3 是什么，以及你的前 5 个键</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>i3 是什么，以及你的前 5 个键</h1>
+
+  <p>这一课只做一件事：让你不看任何表，用键盘完成「开终端 → 切焦点 → 切工作区 → 关窗口」这一套最小操作流。学完它，你就已经能脱离鼠标在 i3 里正常干活了。</p>
+
+  <h2>i3 一句话</h2>
+  <p>i3 是一个<b>平铺式窗口管理器</b>（tiling window manager）：窗口自动铺满屏幕、不重叠，所有操作都靠键盘完成，鼠标是可有可无的。它的设计理念是「手不离开键盘」。<a href="https://i3wm.org/docs/userguide.html">官方用户指南</a>把它概括为一句话：<i>i3 is a tiling window manager, completely written from scratch.</i></p>
+
+  <h2>三个心智概念</h2>
+  <p>动手之前，先记住三个词——它们是你理解后面所有快捷键的地基：</p>
+  <ul>
+    <li><b>Mod 键</b>：几乎所有快捷键的「前缀」键。你的配置里写的是 <code>set $mod Mod4</code>（见 <a href="../config/i3/config">config</a>），<code>Mod4</code> 就是 <kbd>Super</kbd>/<kbd>Win</kbd> 键。以后凡是写 <kbd>Mod</kbd>+某键，都指「先按住 Win 键」。</li>
+    <li><b>工作区</b>（workspace）：i3 有 10 个虚拟桌面，编号 1–10，用 <kbd>Mod</kbd>+<kbd>1</kbd>…<kbd>0</kbd> 切换。每个工作区是一组窗口的「容器」。</li>
+    <li><b>焦点</b>（focus）：在平铺布局里，同时只有一个窗口是「激活」的（边框高亮），你的键盘输入只进到它那里。移动焦点 = 决定「接下来操作哪个窗口」。</li>
+  </ul>
+
+  <h2>你的前 5 个键</h2>
+  <p>注意：i3 <a href="https://i3wm.org/docs/refcard.html">默认方向键</a>是 <kbd>j</kbd><kbd>k</kbd><kbd>l</kbd><kbd>;</kbd>，但你这套借用来的配置改成了 <b>Vim 式 <kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd></b>（<a href="../config/i3/config">config</a> 第 73–76 行）——这跟你用 Vim 的习惯一致，是好事。</p>
+
+  <table>
+    <tr><th>操作</th><th>按键</th><th>作用</th></tr>
+    <tr><td>开终端</td><td><kbd>Mod</kbd>+<kbd>Enter</kbd></td><td>打开 alacritty，一切从这里开始</td></tr>
+    <tr><td>移动焦点</td><td><kbd>Mod</kbd>+<kbd>h</kbd>/<kbd>j</kbd>/<kbd>k</kbd>/<kbd>l</kbd></td><td>焦点移到 左/下/上/右 的窗口</td></tr>
+    <tr><td>切换工作区</td><td><kbd>Mod</kbd>+<kbd>1</kbd>…<kbd>0</kbd></td><td>跳到工作区 1–10（<kbd>0</kbd> 是第 10 个）</td></tr>
+    <tr><td>关闭窗口</td><td><kbd>Mod</kbd>+<kbd>q</kbd></td><td>优雅地关掉焦点窗口（走 <code>_i3-graceful-kill</code>）</td></tr>
+    <tr><td>系统菜单</td><td><kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>Esc</kbd></td><td>弹出关机/锁屏/重启菜单，再按 <kbd>h</kbd> 关机、<kbd>l</kbd> 锁屏</td></tr>
+  </table>
+
+  <h2>检验一下（检索练习）</h2>
+  <p>凭记忆作答，别回头翻表——想不起来正是记忆正在强化的信号。</p>
+
+  <div class="quiz" data-quiz='[
+    {"q":"把焦点移到左边的窗口，按什么？","options":["Mod+h","Mod+j","Mod+k","Mod+l"],"answer":0,"explain":"h/j/k/l 对应 左/下/上/右，和 Vim 方向一致。"},
+    {"q":"把焦点移到上方的窗口，按什么？","options":["Mod+h","Mod+j","Mod+k","Mod+l"],"answer":2,"explain":"k 是上，j 是下——记法：k 的键位在 j 上方。"},
+    {"q":"切换到工作区 5，按什么？","options":["Mod+5","Mod+Shift+5","Ctrl+5","Alt+5"],"answer":0,"explain":"工作区用 Mod+数字直接切换；带 Shift 是把当前窗口移过去（下一课学）。"},
+    {"q":"优雅地关闭当前窗口，按什么？","options":["Mod+q","Mod+w","Mod+f","Mod+r"],"answer":0,"explain":"Mod+q 走 _i3-graceful-kill，比强行杀掉进程更安全。"},
+    {"q":"打开系统菜单（关机/锁屏/重启），按什么？","options":["Mod+Shift+Esc","Mod+Shift+q","Mod+Shift+r","Mod+Shift+c"],"answer":0,"explain":"菜单里再按 h 关机、l 锁屏、e 注销、r 重启、s 挂起。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <p>别只是读——现在就在你的 i3 里把这套动作完整走三遍：</p>
+  <ol class="practice">
+    <li>按 <kbd>Mod</kbd>+<kbd>Enter</kbd> 开一个终端。</li>
+    <li>再按两次，开出三个终端；用 <kbd>Mod</kbd>+<kbd>h</kbd>/<kbd>j</kbd>/<kbd>k</kbd>/<kbd>l</kbd> 在它们之间来回移动焦点，观察哪个窗口边框高亮。</li>
+    <li>按 <kbd>Mod</kbd>+<kbd>2</kbd> 切到空白工作区，开一个终端，再按 <kbd>Mod</kbd>+<kbd>1</kbd> 切回来。</li>
+    <li>用 <kbd>Mod</kbd>+<kbd>q</kbd> 逐个关掉刚才开的所有窗口。</li>
+    <li>按 <kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>Esc</kbd> 打开系统菜单，再按 <kbd>Esc</kbd> 退回（先别真的关机）。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>想读权威原文，看 <a href="https://i3wm.org/docs/userguide.html">i3 官方用户指南</a>——尤其是「Using i3」一章，讲的正是本课的窗口/工作区/焦点。你的这套配置键位以 <a href="../config/i3/config">config/i3/config</a> 为准，另有自写的 <a href="../config/i3/USAGE.md">USAGE.md</a> 速查。键位速查打印版见 <a href="../reference/i3-keys.html">i3 核心键位速查表</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>下一步：<a href="0002-move-and-split.html">0002 · 移动窗口与分屏</a>。有任何不清楚的地方，直接问我——我是你的老师，随时可以解答。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

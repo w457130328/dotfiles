@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0021 · 总复习：i3 + zsh + vim</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>总复习：i3 + zsh + vim 三阶段</h1>
+
+  <p>这是<b>间隔重复</b>。用法：看每一行的<b>场景</b>，<b>先盖住答案、凭记忆回想</b>键位/命令，想不起来再点开看答案。答错的在旁边记一笔，之后重点重练。</p>
+
+  <h2>阶段 1 · i3（Mod = Super 键）</h2>
+  <details><summary>打开终端？</summary><p><code>Mod + Return</code></p></details>
+  <details><summary>关闭当前窗口？</summary><p><code>Mod + q</code></p></details>
+  <details><summary>切到工作区 3？</summary><p><code>Mod + 3</code>（<code>Mod+0</code> = 工作区 10）</p></details>
+  <details><summary>把窗口搬到工作区 3？</summary><p><code>Mod + Shift + 3</code></p></details>
+  <details><summary>水平分屏 / 垂直分屏？</summary><p>水平 <code>Mod + z</code>，垂直 <code>Mod + v</code></p></details>
+  <details><summary>移动焦点（往左/下/上/右）？</summary><p><code>Mod + h / j / k / l</code></p></details>
+  <details><summary>移动窗口（往左/下/上/右）？</summary><p><code>Mod + Shift + h / j / k / l</code></p></details>
+  <details><summary>窗口浮动 / 取消浮动？</summary><p><code>Mod + Shift + Space</code></p></details>
+  <details><summary>全屏？</summary><p><code>Mod + f</code></p></details>
+  <details><summary>调整窗口大小？</summary><p><code>Mod + r</code> 进 resize 模式 → <code>h/j/k/l</code> 调 → <code>Esc</code> 退出</p></details>
+  <details><summary>启动应用（rofi）？</summary><p><code>Mod + g</code>（run）</p></details>
+  <details><summary>常用应用快捷键？</summary><p>chromium <code>Mod+Alt+1</code>、firefox <code>Mod+Alt+2</code>、intellij <code>Mod+Alt+3</code>、spotify <code>Mod+Alt+5</code></p></details>
+  <details><summary>标签式布局？</summary><p><code>Mod + w</code></p></details>
+  <details><summary>退出 i3（注销）？</summary><p><code>Mod + Shift + q</code></p></details>
+
+  <h2>阶段 2 · zsh</h2>
+  <details><summary>打印当前日期？</summary><p><code>Ctrl + T</code></p></details>
+  <details><summary>打印 Unix 时间戳？</summary><p><code>Esc</code> 再 <code>Ctrl + T</code>（两步）</p></details>
+  <details><summary>快速看 git 状态？</summary><p><code>Ctrl + G</code></p></details>
+  <details><summary>管道后缀「翻页 / 过滤 / 取前几行」？</summary><p><code>L</code>（less）、<code>G</code>（grep）、<code>H</code>（head）</p></details>
+  <details><summary>管道后缀「格式化 JSON」？</summary><p><code>Fj</code>（jq .）</p></details>
+  <details><summary>git：状态 / 提交 / 加全部？</summary><p><code>gst</code> / <code>gcmsg</code> / <code>gaa</code></p></details>
+  <details><summary>⚠️ git 两个坑：gcm 和 gs 是什么？</summary><p><code>gcm</code> = checkout main（<b>不是</b> commit）；<code>gs</code> = git show（<b>不是</b> status）</p></details>
+  <details><summary>普通别名：cat / vim / source 配置？</summary><p><code>c</code> / <code>v</code> / <code>sz</code></p></details>
+  <details><summary>后缀别名：.jar / .zip / .pdf 会怎样？</summary><p><code>.jar</code> 直接运行、<code>.zip</code> 列内容、<code>.pdf</code> 用 mupdf 打开</p></details>
+
+  <h2>阶段 3 · vim（leader = 空格）</h2>
+  <details><summary>保存 / 退出？</summary><p><code>Ctrl + s</code> / <code>Ctrl + q</code></p></details>
+  <details><summary>新 buffer / 切下一个 / 切上一个 / 关 buffer？</summary><p><code>空格+t</code> / <code>空格+l</code> / <code>空格+h</code> / <code>空格+bd</code></p></details>
+  <details><summary>切回上一个 buffer？</summary><p><code>空格 + 空格</code></p></details>
+  <details><summary>方向键的作用（normal 模式）？</summary><p><code>←/→</code> 切 buffer，<code>↑/↓</code> 滚屏</p></details>
+  <details><summary>找文件 / 搜内容 / 文件树？</summary><p><code>空格+n</code>（fzf Files）/ <code>空格+f</code>（Rg）/ <code>空格+x</code>（Explore）</p></details>
+  <details><summary>搜索 + 下一个 + 清除高亮？</summary><p><code>/词</code>、<code>n</code>、<code>Ctrl + l</code></p></details>
+  <details><summary>全文替换？</summary><p><code>:%s/旧/新/g</code></p></details>
+  <details><summary>当前行下移 / 上移？</summary><p><code>Ctrl + j</code> / <code>Ctrl + k</code></p></details>
+  <details><summary>粘贴代码防缩进乱？</summary><p><code>Ctrl + p</code>（paste 模式）</p></details>
+  <details><summary>切换自动换行？</summary><p><code>空格 + w</code></p></details>
+  <details><summary>改引号/加括号/删括号？</summary><p><code>cs</code> / <code>ys</code> / <code>ds</code>（vim-surround）</p></details>
+  <details><summary>看撤销历史树？</summary><p><code>:UndotreeToggle</code>，然后 <code>Ctrl+w h</code> 切进面板</p></details>
+  <details><summary>展开代码片段 + 跳占位符？</summary><p>触发词 + <code>Tab</code>；跳下一个 <code>Tab</code>，跳回 <code>Shift+Tab</code></p></details>
+  <details><summary>英文标题转大写？</summary><p><code>空格 + c</code></p></details>
+  <details><summary>ASCII 大字（能用的那个）？</summary><p><code>空格 + 1</code>（带边框；<code>2/3</code> 你的机器缺字体会报错）</p></details>
+  <details><summary>英文拼写检查？</summary><p><code>Ctrl + ]</code></p></details>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>所有键位见 <a href="../config/i3/config">i3 config</a>、<a href="../zsh/oh-my-zsh-custom/custom/shortcuts.zsh">shortcuts.zsh</a>、<a href="../zsh/.aliases">.aliases</a>、<a href="../vim/.vimrc">.vimrc</a>。详细讲解回到各课：<a href="0001-i3-basics.html">i3 0001–0005</a>、<a href="0006-zsh-global-aliases.html">zsh 0006–0009</a>、<a href="0010-vim-basics.html">vim 0010–0020</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>答错的题，重练对应那课。有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+</body>
+</html>

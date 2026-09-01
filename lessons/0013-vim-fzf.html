@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0013 · vim 导航：找文件、搜内容（fzf）</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>vim 导航：找文件、搜内容（fzf）</h1>
+
+  <p>这一课学 vim 里最值钱的三个导航键——它们让你<b>不用记住文件在哪、代码在哪</b>，敲几个字母就跳过去。全挂在 leader（空格）上，定义在 <a href="../vim/.vimrc">.vimrc</a> 第 169–171 行。</p>
+
+  <h2>三个导航键</h2>
+  <table>
+    <tr><th>键</th><th>命令</th><th>用来干什么</th></tr>
+    <tr><td><kbd>空格</kbd>+<kbd>n</kbd></td><td><code>:Files</code></td><td><b>按文件名找</b>——你知道文件名，模糊打几个字母</td></tr>
+    <tr><td><kbd>空格</kbd>+<kbd>f</kbd></td><td><code>:Rg</code></td><td><b>按内容搜</b>——你知道文件里有什么字，搜关键字</td></tr>
+    <tr><td><kbd>空格</kbd>+<kbd>x</kbd></td><td><code>:Explore</code></td><td><b>浏览目录树</b>——不确定要找什么，一层层逛</td></tr>
+  </table>
+
+  <h2>怎么用 fzf（前两个键）</h2>
+  <p><kbd>空格</kbd>+<kbd>n</kbd> 或 <kbd>空格</kbd>+<kbd>f</kbd> 会弹出 fzf 的模糊搜索框：</p>
+  <ul>
+    <li><b>直接打字</b>——列表实时过滤，不用打全名，打中间几个字母就行。</li>
+    <li><kbd>Ctrl</kbd>+<kbd>j</kbd> / <kbd>Ctrl</kbd>+<kbd>k</kbd>（或上下键）——上下移动选择。</li>
+    <li><kbd>Enter</kbd>——打开选中的文件 / 跳到选中位置。</li>
+    <li><kbd>Esc</kbd>——取消，回到 vim。</li>
+  </ul>
+
+  <h2>两个的区别（容易混）</h2>
+  <ul>
+    <li><b><code>:Files</code>（空格+n）搜的是文件名</b>——比如你记得有个文件叫 <code>shortcuts</code>，打 <code>short</code> 就筛出来。</li>
+    <li><b><code>:Rg</code>（空格+f）搜的是文件内容</b>——比如你想找「哪里用了 <code>bindkey</code>」，打 <code>bindkey</code>，列出所有含它的行，回车直接跳到那一行。</li>
+  </ul>
+  <p>记法：<b>n = name（名字）、f = find（找内容）、x = eXplore（浏览）</b>。</p>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"按文件名模糊查找，按什么？","options":["空格+n","空格+f","空格+x","空格+h"],"answer":0,"explain":"空格+n = :Files 按文件名。"},
+    {"q":"按文件内容搜索，按什么？","options":["空格+f","空格+n","空格+x","空格+l"],"answer":0,"explain":"空格+f = :Rg 按内容搜。"},
+    {"q":"浏览目录树，按什么？","options":["空格+x","空格+n","空格+f","空格+t"],"answer":0,"explain":"空格+x = :Explore 文件树。"},
+    {"q":"fzf 搜索框里选中后，按什么打开？","options":["Enter","Esc","空格","Tab"],"answer":0,"explain":"Enter 打开；Esc 取消。"},
+    {"q":"想找哪里用了 bindkey 这个词，按什么？","options":["空格+f 再输 bindkey","空格+n 再输 bindkey","空格+x","空格+h"],"answer":0,"explain":"搜内容用 :Rg（空格+f）。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <ol class="practice">
+    <li><code>cd ~/Projects/dotfiles</code> 然后 <code>v .</code>——用 vim 打开这个项目目录。</li>
+    <li><kbd>空格</kbd>+<kbd>n</kbd>——输入 <code>zshr</code>，看到 <code>.zshrc</code> 被筛出来，<kbd>Enter</kbd> 打开。</li>
+    <li><kbd>空格</kbd>+<kbd>n</kbd>——输入 <code>alias</code>，看到 <code>.aliases</code>，打开它。</li>
+    <li><kbd>空格</kbd>+<kbd>f</kbd>——输入 <code>bindkey</code>，列出所有含 bindkey 的行，上下选一个，<kbd>Enter</kbd> 跳过去。</li>
+    <li><kbd>空格</kbd>+<kbd>x</kbd>——打开文件树，<kbd>Enter</kbd> 进目录，再 <kbd>Enter</kbd> 打开文件（<kbd>-</kbd> 返回上一级）。</li>
+    <li><kbd>Ctrl</kbd>+<kbd>q</kbd> 退出。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>这三个映射见 <a href="../vim/.vimrc">vim/.vimrc</a> 第 169–171 行。fzf 本身见 <a href="https://github.com/junegunn/fzf.vim">junegunn/fzf.vim</a>。上一课：<a href="0012-vim-buffers.html">0012 · buffer 多文件切换</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

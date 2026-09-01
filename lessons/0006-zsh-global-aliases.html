@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0006 · zsh 全局别名：管道后缀</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>zsh 全局别名：管道后缀</h1>
+
+  <p>进入 zsh。这一课学你这套配置里<b>最省事</b>的东西——全局别名（管道后缀）：敲一个字母，代替一整个 <code>| 命令</code>。这是"用得顺"里回报率最高的一课。</p>
+
+  <h2>普通别名 vs 全局别名</h2>
+  <p>先分清两种别名，这是本课的地基：</p>
+  <ul>
+    <li><b>普通别名</b>（<code>alias c='cat'</code>）：只能替换<b>命令开头</b>。你敲 <code>c 文件</code> → <code>cat 文件</code>。</li>
+    <li><b>全局别名</b>（<code>alias -g L='| less'</code>）：能在命令<b>任何位置</b>展开。你敲 <code>ps aux L</code> → <code>ps aux | less</code>。这是 zsh 独有（bash 没有）。</li>
+  </ul>
+  <p>你的配置用全局别名做了一组<b>管道后缀</b>——把最常用的 <code>| 命令</code> 缩成一个字母，见 <a href="../zsh/.aliases">zsh/.aliases</a> 第 239–251 行。</p>
+
+  <h2>核心管道后缀</h2>
+  <p>先记住这几个高频的（用法：在命令末尾直接敲字母）：</p>
+  <table>
+    <tr><th>别名</th><th>展开成</th><th>用途</th></tr>
+    <tr><td><code>L</code></td><td><code>| less</code></td><td>分页查看</td></tr>
+    <tr><td><code>H</code></td><td><code>| head</code></td><td>只看开头几行</td></tr>
+    <tr><td><code>G</code></td><td><code>| grep</code></td><td>过滤匹配行</td></tr>
+    <tr><td><code>C</code></td><td><code>| clipcopy</code></td><td>结果复制到剪贴板</td></tr>
+    <tr><td><code>Fj</code></td><td><code>| jq .</code></td><td>JSON 格式化</td></tr>
+  </table>
+
+  <p>这些后缀还能<b>串联</b>。一个真实例子：</p>
+  <blockquote>
+    <p><code>ps aux G java L</code> 等价于 <code>ps aux | grep java | less</code>——列出所有进程，过滤含 java 的，再分页看。</p>
+  </blockquote>
+  <p>敲三个字母 <code>G</code> 省掉 <code>| grep </code>，再敲 <code>L</code> 省掉 <code>| less</code>。这就是全局别名的力量。</p>
+
+  <h2>检验一下（检索练习）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"全局别名 L 展开成什么？","options":["| less","| head","| grep","| tail"],"answer":0,"explain":"L = less，分页查看。"},
+    {"q":"全局别名 G 展开成什么？","options":["| less","| head","| grep","| tail"],"answer":2,"explain":"G = grep，过滤匹配行。"},
+    {"q":"全局别名 H 展开成什么？","options":["| less","| head","| grep","| tail"],"answer":1,"explain":"H = head，只看开头几行。"},
+    {"q":"全局别名 C 展开成什么？","options":["| clipcopy","| xclip","| copy","| paste"],"answer":0,"explain":"C = clipcopy，把结果复制到剪贴板。"},
+    {"q":"全局别名 Fj 展开成什么？","options":["| jq .","| yq .","| jq","| json"],"answer":0,"explain":"Fj = jq .，JSON 格式化输出。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <p>打开终端，逐条敲，看结果和展开后是否一致：</p>
+  <ol class="practice">
+    <li>敲 <code>ps aux G java</code>——等价于 <code>ps aux | grep java</code>，看到含 java 的进程。</li>
+    <li>敲 <code>ps aux G java L</code>——分页查看，<kbd>q</kbd> 退出。</li>
+    <li>敲 <code>ls /usr/bin H</code>——只显示前 10 行。</li>
+    <li>敲 <code>echo 你好 C</code>——然后 <kbd>Ctrl</kbd>+<kbd>V</kbd> 粘贴，验证"你好"已进剪贴板。</li>
+    <li>敲 <code>echo '{"a":1}' Fj</code>——看到 JSON 被格式化。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>全局别名的权威定义见 <a href="https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html">zsh 官方手册的 alias 内置命令</a>（`-g` 选项）。你的别名以 <a href="../zsh/.aliases">zsh/.aliases</a> 为准；速查打印版见 <a href="../reference/zsh-aliases.html">zsh 别名速查表</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>下一步：<a href="0007-zsh-bindkeys.html">0007 · zsh 快捷键（bindkey）</a>。有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>
