@@ -1,7 +1,13 @@
 set $mod Mod4
 
+exec --no-startup-id /home/jiangtao/.local/bin/auto-primary
 exec --no-startup-id nitrogen --restore
 exec --no-startup-id fcitx5 -d
+exec --no-startup-id snixembed
+exec --no-startup-id nm-applet
+exec --no-startup-id /home/jiangtao/.local/bin/v2rayn
+exec --no-startup-id /home/jiangtao/.local/bin/vpn-up
+exec --no-startup-id xset s off -dpms
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.

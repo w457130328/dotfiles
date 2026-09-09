@@ -103,3 +103,25 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+# nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+
+
+proxy_on() {
+  export http_proxy="http://127.0.0.1:10808"
+  export https_proxy="$http_proxy"
+  export HTTP_PROXY="$http_proxy"
+  export HTTPS_PROXY="$http_proxy"
+  export all_proxy="$http_proxy"
+  export ALL_PROXY="$http_proxy"
+  echo "🟢 代理已开启: $http_proxy"
+}
+
+proxy_off() {
+  unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY
+  echo "🔴 代理已关闭"
+}
