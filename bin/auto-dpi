@@ -14,7 +14,7 @@
 #   Qt 5/6                      QT_SCALE_FACTOR + QT_FONT_DPI
 #   Firefox                     网页内容 devPixelsPerPx；界面跟着 GTK
 #   Chromium / Electron         GTK 那套（别再加启动参数，会和它叠成 4 倍）
-#   Java/Swing (IDEA)           屏幕 DPI（会被 GDK_DPI_SCALE 干扰，所以不设它）
+#   Java/Swing (IDEA)           不自动——JBR 在本机不侦测 DPI，用 bin/idea 启动时现算
 #   Alacritty / winit           Xft.dpi（winit 自己读）
 #
 # 接管/生成的文件：~/.Xresources、~/.config/gtk-{3,4}.0/settings.ini、
@@ -49,13 +49,15 @@ DO_QT=1               # 写 Qt 环境变量
 DO_CHROMIUM=1         # 写 Chromium 启动参数
 DO_FIREFOX=1          # 写 Firefox 网页 DPI
 DO_ROFI=1             # 写 rofi 的 config.rasi（它不读 Xft.dpi）
-DO_IDEA=0             # IntelliJ：现代版本自动跟随 GDK_SCALE，通常不用开
 RESTART_FCITX5=1      # 倍数变化时重启 fcitx5（否则输入法窗口还是旧大小）
 
 SHOW=0
+PRINT_SCALE=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --show)   SHOW=1 ;;
+    # 只输出倍数、不碰任何文件。给启动包装脚本用（如 bin/idea 按当前屏幕设置 JVM 缩放）
+    --print-scale) PRINT_SCALE=1 ;;
     --scale)  SCALE="${2:?--scale 需要一个值}"; shift ;;
     # 打印文件头部的注释块（从第 2 行到第一个非注释行），不写死行号
     -h|--help) sed -n '2,/^[^#]/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//'; exit 0 ;;
@@ -132,6 +134,11 @@ DPI_MILLI=$(( DPI * 1024 ))                       # GTK 的 DPI 单位是 1/1024
 CURSOR_PX=$(awk -v c="$CURSOR_SIZE" -v s="$S" 'BEGIN{printf "%.0f", c*s}')
 GDK_INT=$(awk -v s="$S" 'BEGIN{printf "%.0f", (s < 1 ? 1 : s)}')   # 窗口缩放只能整数
 FF_DPR=$(awk -v s="$S" 'BEGIN{printf "%.1f", s}')
+
+if [ "$PRINT_SCALE" = 1 ]; then
+  printf '%s\n' "$S"
+  exit 0
+fi
 
 if [ "$SHOW" = 1 ]; then
   cat <<EOF
@@ -352,19 +359,28 @@ EOF
   fi
 fi
 
-# 8) IntelliJ —— 现代 JetBrains 会通过 JRE 自动跟随 GDK_SCALE，一般不用管。
-if [ "$DO_IDEA" = 1 ]; then
-  for d in "$XDG_CONFIG_HOME"/JetBrains/*/; do
-    [ -d "$d" ] || continue
-    f="$d/idea64.vmoptions"
+# 8) IntelliJ —— 【刻意不在这里管缩放】。
+#    本机 JBR 不会自动侦测 DPI（实测 Xft.dpi=192 时仍报 96dpi / scale=1.0，
+#    停掉 xsettingsd 也一样），必须靠 -Dsun.java2d.uiScale 强制。
+#    但写进全局 vmoptions 就是一刀切：切回 1920x1080 屏时字会变得巨大。
+#    所以改成启动时现算 —— `bin/idea` 在每次启动前调 `auto-dpi --print-scale`
+#    拿到当前倍数，再通过 IDEA_VM_OPTIONS 注入。好处是换屏后不用重新登录。
+#    这里只负责清掉旧版写进全局的那行，否则它会一直生效。
+for d in "$XDG_CONFIG_HOME"/JetBrains/*/; do
+  [ -d "$d" ] || continue
+  f="${d%/}/idea64.vmoptions"
+  [ -f "$f" ] || continue
+  grep -q -- '-Dsun\.java2d\.uiScale=' "$f" || continue
+  if [ "$(grep -cvE '^[[:space:]]*(#|$)' "$f")" = 1 ]; then
+    # 整个文件就只有 auto-dpi 旧版写的那一行，直接删掉
+    rm -f "$f"
+    log "已删除 auto-dpi 旧版写的 $f（改用 bin/idea 启动时现算）"
+  else
     backup "$f"
-    if [ -f "$f" ] && grep -q 'sun.java2d.uiScale=' "$f"; then
-      sed -i -E "s|^-Dsun\.java2d\.uiScale=.*|-Dsun.java2d.uiScale=$S|" "$f"
-    else
-      printf -- '-Dsun.java2d.uiScale=%s\n' "$S" >> "$f"
-    fi
-  done
-fi
+    sed -i -E '/^-Dsun\.java2d\.uiScale=/d' "$f"
+    log "已从 $f 移除 -Dsun.java2d.uiScale（改用 bin/idea 启动时现算）"
+  fi
+done
 
 # 9) i3 的字体【不要动】。
 #    i3 用 Pango 渲染标题栏和 i3bar，它确实读 Xft.dpi——但【只在进程启动时读一次】

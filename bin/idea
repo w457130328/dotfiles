@@ -1,0 +1,38 @@
+#!/bin/sh
+#
+# idea —— 启动 IntelliJ IDEA，并按**当前屏幕**自动设置缩放。
+#
+# 为什么必须包一层：
+#   JBR 在本机不会自动侦测屏幕 DPI —— 实测 Xft.dpi=192 时它仍报 96dpi / scale=1.0，
+#   而且它不读 XSETTINGS（把 Gdk/UnscaledDPI 从 96 改成 192 复测，GTK 会变成 4 倍，
+#   JBR 却纹丝不动）。详见 auto-dpi 里 "8) IntelliJ" 那段。
+#
+#   唯一的办法是 `-Dsun.java2d.uiScale`，而它是 **JVM 启动参数**，只能在进程起来
+#   之前注入。写进全局 vmoptions 会一刀切——换屏后就过期了。所以在这里每次启动时
+#   现算：先问 auto-dpi 当前该用几倍（它已处理 4K→2 / 1080p→1 的判定），再指向一份
+#   临时 vmoptions。
+#
+#   好处：换屏后**不需要重新登录**，下次启动 IDEA 就是对的大小。
+#   （比 GTK / Qt 那套还及时——那两个的倍数来自登录时冻结的环境变量。）
+#
+set -e
+
+REAL_IDEA=/opt/intellij-idea-ultimate-edition/bin/idea
+
+# 问 auto-dpi 该用几倍。它不在 / 出错时退回 1（不放大），宁可小也不要大到没法用。
+SCALE=$(auto-dpi --print-scale 2>/dev/null) || SCALE=1
+case "$SCALE" in
+  '' | *[!0-9.]*) SCALE=1 ;;
+esac
+
+# 用 cache 目录放临时 vmoptions：它是可再生的，不需要进版本库或备份
+VMF="${XDG_CACHE_HOME:-$HOME/.cache}/auto-dpi/idea.vmoptions"
+mkdir -p "$(dirname "$VMF")"
+printf -- '-Dsun.java2d.uiScale=%s\n' "$SCALE" > "$VMF"
+
+# 启动器会优先读 IDEA_VM_OPTIONS 指向的文件
+# （变量名 = product-info.json 的 envVarBaseName + "_VM_OPTIONS"）
+IDEA_VM_OPTIONS="$VMF"
+export IDEA_VM_OPTIONS
+
+exec "$REAL_IDEA" "$@"
