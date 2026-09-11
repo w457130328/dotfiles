@@ -1,0 +1,12 @@
+export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
+
+# HiDPI：按当前分辨率自动设置缩放，并导出 GDK_/QT_ 环境变量给整个会话。
+#
+# 顺序很关键：sddm 的 Xsession 会先 source 本文件，之后才执行
+# `xrdb -merge ~/.Xresources`。auto-dpi 会在这里就把正确的 Xft.dpi
+# 写进 ~/.Xresources，所以不会被那份文件里的旧值覆盖回去
+#（这正是之前手动配 DPI 总是不生效的原因）。
+if [ -x "$HOME/bin/auto-dpi" ]; then
+  "$HOME/bin/auto-dpi" || true
+  [ -f "$HOME/.config/auto-dpi/env.sh" ] && . "$HOME/.config/auto-dpi/env.sh"
+fi

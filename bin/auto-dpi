@@ -1,0 +1,431 @@
+#!/usr/bin/env bash
+#
+# auto-dpi —— 按屏幕分辨率/物理尺寸自动设置 X11 HiDPI 缩放。
+#
+# X11 没有"一处设置全局生效"的开关：每个工具包读的东西都不一样。本脚本
+# 把该写的都写一遍，于是你只需要维护 ~/.config/auto-dpi.conf 一个文件。
+#
+#   谁                          听谁的
+#   --------------------------  ------------------------------------------
+#   i3 标题栏 / i3bar           自己的 font 指令（实测【不读】Xft.dpi！）
+#   rofi                        自己 config.rasi 里的 dpi（实测【不读】Xft.dpi！）
+#   xterm 等 Xft 程序           Xft.dpi（X resource）
+#   GTK 2/3                     Xft.dpi + GDK_SCALE + GDK_DPI_SCALE
+#   GTK 4                       GDK_SCALE + GDK_DPI_SCALE（不读 Xft.dpi）
+#   Qt 5/6                      QT_SCALE_FACTOR + QT_FONT_DPI
+#   Firefox                     GDK_SCALE（界面）+ prefs 的 devPixelsPerPx
+#   Chromium / Electron         GDK_SCALE（+ 启动参数兜底）
+#   Java/Swing (IDEA)           GDK_SCALE（JRE 自动侦测）
+#   Alacritty / winit           Xft.dpi（winit 自己读）
+#
+# 接管/生成的文件：~/.Xresources、~/.config/gtk-{3,4}.0/settings.ini、
+#   ~/.config/xsettingsd/xsettingsd.conf、~/.config/i3/config 的 font 行、
+#   ~/.config/auto-dpi/env.sh、~/.config/chromium-flags.conf、Firefox 的 user.js、
+#   ~/.config/rofi/config.rasi。
+# 这些文件的原件首次运行时会备份到 ~/.local/state/auto-dpi/backup/ 下（镜像原路径）。
+#
+# 用法:
+#   auto-dpi              检测并应用（登录时由 ~/.xprofile 调用）
+#   auto-dpi --show       只打印检测结果，不动任何文件
+#   auto-dpi --scale 1.5  本次强制倍数（等价于 conf 里写 SCALE=1.5）
+#
+set -euo pipefail
+
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+CONF="$XDG_CONFIG_HOME/auto-dpi.conf"
+STATEDIR="$XDG_CONFIG_HOME/auto-dpi"
+ENVFILE="$STATEDIR/env.sh"
+STATEFILE="$STATEDIR/state"
+BACKUPDIR="$HOME/.local/state/auto-dpi/backup"
+
+# ---------------------------------------------------------------- 可调项
+# 全部可在 ~/.config/auto-dpi.conf 里覆盖
+SCALE=""              # 空 = 自动检测；也可写死 1 / 1.5 / 2
+BASE_DPI=96           # 缩放基准，一般别动
+ROUND=nearest         # 自动检测取整: nearest | floor | ceil
+CURSOR_SIZE=24        # 1x 下的光标大小（像素）
+DO_GTK=1              # 写 GTK3/4 settings.ini
+DO_XSETTINGSD=1       # 用 xsettingsd 提供 GTK 窗口缩放（可实时跟随，见文件末尾说明）
+DO_QT=1               # 写 Qt 环境变量
+DO_CHROMIUM=1         # 写 Chromium 启动参数
+DO_FIREFOX=1          # 写 Firefox 网页 DPI
+DO_ROFI=1             # 写 rofi 的 config.rasi（它不读 Xft.dpi）
+DO_IDEA=0             # IntelliJ：现代版本自动跟随 GDK_SCALE，通常不用开
+RESTART_FCITX5=1      # 倍数变化时重启 fcitx5（否则输入法窗口还是旧大小）
+
+I3_FONT_SPEC="pango:Open Sans, Symbola"   # i3 标题栏/i3bar 字体（不含字号）
+I3_FONT_BASE=8                            # 1x 下的基准字号；写入值 = 基准 × 倍数
+
+SHOW=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --show)   SHOW=1 ;;
+    --scale)  SCALE="${2:?--scale 需要一个值}"; shift ;;
+    # 打印文件头部的注释块（从第 2 行到第一个非注释行），不写死行号
+    -h|--help) sed -n '2,/^[^#]/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) echo "auto-dpi: 未知参数 $1" >&2; exit 2 ;;
+  esac
+  shift
+done
+
+# shellcheck disable=SC1090
+[ -f "$CONF" ] && . "$CONF"
+
+log() { printf 'auto-dpi: %s\n' "$*" >&2; }
+die() { printf 'auto-dpi: %s\n' "$*" >&2; exit 1; }
+
+# ---------------------------------------------------------------- 检测
+# 取 primary 输出（没有 primary 就取第一个 connected）当前分辨率与物理尺寸。
+detect() {
+  [ -n "${DISPLAY:-}" ] || die "没有 DISPLAY，无法检测屏幕"
+
+  OUT=$(xrandr --query 2>/dev/null | awk '/ connected/ && / primary /{print $1; exit}')
+  [ -n "$OUT" ] || OUT=$(xrandr --query 2>/dev/null | awk '/ connected/{print $1; exit}')
+  [ -n "$OUT" ] || die "没找到已连接的显示器"
+
+  local geo mode
+  geo=$(xrandr --query | awk -v n="$OUT" '$1 == n {print; exit}')
+  mode=$(xrandr --query | awk -v n="$OUT" '$1 == n {f=1; next}
+        f && /^[[:space:]]*[0-9]+x[0-9]+/ && /\*/ {print $1; exit}')
+  [ -n "$mode" ] || die "$OUT 没有当前模式（是否已 xrandr --auto？）"
+
+  W="${mode%%x*}"
+  H="${mode##*x}"
+
+  # 物理尺寸（EDID 提供）。投影仪/虚拟屏可能没有，退回按分辨率分档。
+  if [[ $geo =~ ([0-9]+)mm[[:space:]]*x[[:space:]]*([0-9]+)mm ]]; then
+    MMW="${BASH_REMATCH[1]}"; MMH="${BASH_REMATCH[2]}"
+  else
+    MMW=0; MMH=0
+  fi
+
+  if [ "$MMW" -gt 0 ]; then
+    REAL_DPI=$(awk -v w="$W" -v mm="$MMW" 'BEGIN{printf "%.1f", w*25.4/mm}')
+  else
+    REAL_DPI="未知"
+  fi
+}
+
+# 由分辨率/物理 DPI 推出整数倍数
+pick_scale() {
+  if [ -n "$SCALE" ]; then
+    printf '%s' "$SCALE"; return
+  fi
+  if [ "$MMW" -gt 0 ]; then
+    awk -v w="$W" -v mm="$MMW" -v base="$BASE_DPI" -v r="$ROUND" 'BEGIN{
+      x = (w*25.4/mm) / base
+      if (r == "floor")      n = int(x)
+      else if (r == "ceil")  n = int(x) + (x > int(x) ? 1 : 0)
+      else                   n = int(x + 0.5)
+      if (n < 1) n = 1
+      if (n > 4) n = 4
+      print n
+    }'
+  else
+    # 没有物理尺寸：按宽度的常见档位猜
+    if [ "$W" -ge 3000 ]; then printf 2; else printf 1; fi
+  fi
+}
+
+detect
+S=$(pick_scale)
+[ -n "$S" ] || die "无法确定缩放倍数"
+
+DPI=$(awk -v b="$BASE_DPI" -v s="$S" 'BEGIN{printf "%.0f", b*s}')
+DPI_MILLI=$(( DPI * 1024 ))                       # GTK 的 DPI 单位是 1/1024
+CURSOR_PX=$(awk -v c="$CURSOR_SIZE" -v s="$S" 'BEGIN{printf "%.0f", c*s}')
+GDK_INT=$(awk -v s="$S" 'BEGIN{printf "%.0f", (s < 1 ? 1 : s)}')   # GDK_SCALE 只能整数
+GDK_DPI=$(awk -v g="$GDK_INT" 'BEGIN{printf "%.4g", 1/g}')
+FF_DPR=$(awk -v s="$S" 'BEGIN{printf "%.1f", s}')
+
+if [ "$SHOW" = 1 ]; then
+  cat <<EOF
+输出      : $OUT
+当前分辨率: ${W}x${H}
+物理尺寸  : ${MMW}x${MMH} mm$([ "$MMW" = 0 ] && echo '  (无 EDID 信息，按分辨率分档)')
+实际 DPI  : ${REAL_DPI}${MMW:+
+对角尺寸  : $(awk -v a="$MMW" -v b="$MMH" 'BEGIN{printf "%.1f", sqrt(a*a+b*b)/25.4}') 英寸}
+缩放倍数  : ${S}x
+→ Xft.dpi            : $DPI
+→ gtk-xft-dpi        : $DPI_MILLI
+→ GDK_SCALE          : $GDK_INT
+→ GDK_DPI_SCALE      : $GDK_DPI
+→ QT_SCALE_FACTOR    : $S   (QT_FONT_DPI=$BASE_DPI)
+→ i3 字体            : $I3_FONT_SPEC $(
+    awk -v b="$I3_FONT_BASE" -v s="$S" 'BEGIN{printf "%d", b*s + 0.5}')
+→ 光标大小           : $CURSOR_PX px
+→ 终端/GTK/Qt 字体   : 字号数值不变，由 DPI 放大（这样 4K 和 1080p 物理大小一致）
+EOF
+  exit 0
+fi
+
+log "$OUT ${W}x${H}，实际 ${REAL_DPI} DPI → 缩放 ${S}x (Xft.dpi=$DPI)"
+
+# ---------------------------------------------------------------- 工具函数
+# 首次运行备份原件，之后不再覆盖（保留最原始的版本）。
+# 备份集中放在 $BACKUPDIR 下并镜像原路径，而不是散落在文件旁边——
+# 因为 ~/.config/i3 是指向 dotfiles git 仓库的符号链接，把 .bak 丢在旁边
+# 会变成仓库里的未跟踪文件，一不小心就被提交上去。
+backup() {
+  local f=$1 dest
+  [ -e "$f" ] || return 0
+  # 跳过 auto-dpi 自己生成的文件：它们没有"原始版本"可备份
+  if [ -f "$f" ] && grep -q '由 auto-dpi 生成' "$f" 2>/dev/null; then
+    return 0
+  fi
+  dest="$BACKUPDIR$f"
+  [ -e "$dest" ] && return 0
+  mkdir -p "$(dirname "$dest")"
+  cp -a "$f" "$dest"
+  log "已备份 $f → ${dest/#$HOME/~}"
+}
+
+# 改 ini 的 key=value：有则替换，无则追加
+set_ini() {
+  local f=$1 k=$2 v=$3
+  mkdir -p "$(dirname "$f")"
+  [ -f "$f" ] || printf '[Settings]\n' > "$f"
+  if grep -qE "^${k}=" "$f"; then
+    sed -i -E "s|^${k}=.*|${k}=${v}|" "$f"
+  else
+    printf '%s=%s\n' "$k" "$v" >> "$f"
+  fi
+}
+
+# 改 xsettingsd 的 "Key Value"（空格分隔）
+set_xsd() {
+  local f=$1 k=$2 v=$3
+  mkdir -p "$(dirname "$f")"
+  [ -f "$f" ] || : > "$f"
+  if grep -qE "^${k}[[:space:]]" "$f"; then
+    sed -i -E "s|^${k}[[:space:]]+.*|${k} ${v}|" "$f"
+  else
+    printf '%s %s\n' "$k" "$v" >> "$f"
+  fi
+}
+
+# ---------------------------------------------------------------- 写配置
+# 1) X resources —— i3 / i3bar / rofi / Qt / Xlib 字体的总开关。
+#    注意：sddm 的 Xsession 会在 source 完 ~/.xprofile 之后才 xrdb -merge 本文件，
+#    所以这里只要把文件写好，登录时的值就不会被覆盖回 96。
+backup "$HOME/.Xresources"
+cat > "$HOME/.Xresources" <<EOF
+! ---------------------------------------------------------------------
+! 本文件由 auto-dpi 生成，请勿手改。
+! 要改缩放：编辑 $CONF 然后运行 auto-dpi
+! 屏幕 $OUT ${W}x${H}  ${REAL_DPI} DPI  →  缩放 ${S}x
+!（生成时间与历史见 $STATEFILE）
+! ---------------------------------------------------------------------
+Xft.dpi: $DPI
+Xft.antialias: 1
+Xft.hinting: 1
+Xft.hintstyle: hintslight
+Xft.rgba: rgb
+Xcursor.theme: breeze_cursors
+Xcursor.size: $CURSOR_PX
+EOF
+
+# 立刻生效（登录时 sddm 之后还会再 merge 一次，内容相同，幂等）
+if [ -n "${DISPLAY:-}" ] && command -v xrdb >/dev/null; then
+  xrdb -merge "$HOME/.Xresources" 2>/dev/null || true
+fi
+
+# 2) GTK3/GTK4 —— 光标大小与 DPI 兜底。
+#    实测：只要 Xft.dpi 存在，GTK3 会用它覆盖这里的 gtk-xft-dpi；
+#    这里写同样的值只是为了 Xft.dpi 缺失时（如某些容器/远程）仍正确。
+if [ "$DO_GTK" = 1 ]; then
+  for f in "$XDG_CONFIG_HOME/gtk-3.0/settings.ini" "$XDG_CONFIG_HOME/gtk-4.0/settings.ini"; do
+    backup "$f"
+    set_ini "$f" gtk-xft-dpi "$DPI_MILLI"
+    set_ini "$f" gtk-cursor-theme-size "$CURSOR_PX"
+  done
+fi
+
+# 3) xsettingsd —— Gdk/UnscaledDPI 语义上就是"未缩放的基准 DPI"，
+#    所以它保持 96*1024 不变，窗口缩放交给 WindowScalingFactor。
+#    （xsettingsd 当前没在跑；这里同步只是保证将来启用时值是对的）
+XSD="$XDG_CONFIG_HOME/xsettingsd/xsettingsd.conf"
+if [ "$DO_XSETTINGSD" = 1 ] && [ -f "$XSD" ]; then
+  backup "$XSD"
+  set_xsd "$XSD" "Gdk/WindowScalingFactor" "$GDK_INT"
+  set_xsd "$XSD" "Gtk/CursorThemeSize" "$CURSOR_PX"
+  # ⚠ xsettingsd 一旦跑起来，它就是 GTK 设置的唯一来源，settings.ini 会被压过去。
+  #   所以这里要把 settings.ini 里有、而 XSETTINGS 里缺的键补上，否则它们会
+  #   悄悄退回 GTK 默认值（这正是"改了不生效"的经典成因）。
+  grep -qE '^Gtk/Modules[[:space:]]' "$XSD" || \
+    set_xsd "$XSD" "Gtk/Modules" '"colorreload-gtk-module:window-decorations-gtk-module"'
+  grep -qE '^Gtk/ApplicationPreferDarkTheme[[:space:]]' "$XSD" || \
+    set_xsd "$XSD" "Gtk/ApplicationPreferDarkTheme" "0"
+
+  if command -v xsettingsd >/dev/null; then
+    if pgrep -x xsettingsd >/dev/null 2>&1; then
+      pkill -HUP -x xsettingsd 2>/dev/null || true   # 让它重读配置
+    elif [ -n "${DISPLAY:-}" ]; then
+      # 由它提供 Gdk/WindowScalingFactor：这样 GTK 的缩放不依赖环境变量，
+      # 已经在运行的程序也能实时跟随（GTK 会监听 XSETTINGS 变化）。
+      if command -v setsid >/dev/null; then
+        setsid -f xsettingsd >/dev/null 2>&1 || true
+      else
+        xsettingsd >/dev/null 2>&1 &
+      fi
+      sleep 0.5
+      log "已启动 xsettingsd（GTK 缩放来源）"
+    fi
+  fi
+fi
+
+# 4) 环境变量 —— 由 ~/.xprofile source，i3 及其启动的所有程序都继承。
+mkdir -p "$STATEDIR"
+cat > "$ENVFILE" <<EOF
+# 由 auto-dpi 生成，请勿手改（改 $CONF）
+# 屏幕 ${W}x${H} @ ${REAL_DPI}DPI → ${S}x
+#
+# GDK_SCALE 把 GTK 的窗口/控件整体放大 N 倍；窗口放大后 GTK 的字体 DPI
+# 也会跟着乘 N，所以必须再用 GDK_DPI_SCALE=1/N 抵消掉，否则字会变成 N² 倍。
+# 实测（10pt 文本的真实像素宽）:  仅 Xft.dpi=192 → 240px / 控件 1x
+#          Xft.dpi=192 + GDK_SCALE=2 + GDK_DPI_SCALE=0.5 → 240px / 控件 2x  ✓
+#          Xft.dpi=192 + GDK_SCALE=2（漏掉后者）        → 480px / 控件 2x  ✗
+export GDK_SCALE=$GDK_INT
+export GDK_DPI_SCALE=$GDK_DPI
+EOF
+
+if [ "$DO_QT" = 1 ]; then
+  cat >> "$ENVFILE" <<EOF
+
+# Qt：QT_SCALE_FACTOR 放大整个界面，但 Qt 的字体 DPI 也从 Xft.dpi 取，
+# 会二次放大；用 QT_FONT_DPI 把字体 DPI 钉回基准值。
+export QT_SCALE_FACTOR=$S
+export QT_FONT_DPI=$BASE_DPI
+export QT_AUTO_SCREEN_SCALE_FACTOR=0
+export QT_ENABLE_HIGHDPI_SCALING=1
+EOF
+fi
+
+# 5) Chromium / Electron —— GDK_SCALE 通常已经够；显式指定可避免
+#    某些版本忽略 GDK_SCALE。参数优先于 GDK_SCALE，不会叠加。
+if [ "$DO_CHROMIUM" = 1 ]; then
+  backup "$XDG_CONFIG_HOME/chromium-flags.conf"
+  cat > "$XDG_CONFIG_HOME/chromium-flags.conf" <<EOF
+# 由 auto-dpi 生成，请勿手改（改 $CONF）
+--force-device-scale-factor=$S
+EOF
+fi
+
+# 6) Firefox 网页内容缩放。Firefox 在 X11 下不会把 GDK_SCALE 反映到网页的
+#    devicePixelRatio，必须显式给 devPixelsPerPx。
+#    写 user.js 而不是 prefs.js：user.js 每次启动都生效，Firefox 也不会覆盖它，
+#    所以开着 Firefox 也能改（下次启动生效）。
+if [ "$DO_FIREFOX" = 1 ]; then
+  FF_INI="$HOME/.mozilla/firefox/profiles.ini"
+  if [ -f "$FF_INI" ]; then
+    FF_PATH=$(awk -F= '/^\[Install/{i=1; next} /^\[/{i=0}
+                       i && $1=="Default"{print $2; exit}' "$FF_INI")
+    if [ -z "$FF_PATH" ]; then
+      FF_PATH=$(awk -F= '/^\[Profile/{p=""} /^Path=/{p=$2}
+                         /^Default=/{if (p!="" && $2+0==1) {print p; exit}}' "$FF_INI")
+    fi
+    if [ -n "$FF_PATH" ] && [ -d "$HOME/.mozilla/firefox/$FF_PATH" ]; then
+      backup "$HOME/.mozilla/firefox/$FF_PATH/user.js"
+      cat > "$HOME/.mozilla/firefox/$FF_PATH/user.js" <<EOF
+// 由 auto-dpi 生成，请勿手改（改 $CONF）
+// 屏幕 ${W}x${H} → ${S}x
+user_pref("layout.css.devPixelsPerPx", "$FF_DPR");
+EOF
+    else
+      log "找不到 Firefox 默认 profile，跳过"
+    fi
+  fi
+fi
+
+# 7) rofi（$mod+g 启动器）。
+#    实测：rofi 2.0【不读 Xft.dpi】——弹窗默认按 96 渲染，比 i3bar 还小；
+#    而且它连 X resources 里的 rofi.dpi 也不读了（那条路已失效），只能写进 config.rasi。
+#    只设 dpi 不动 font：dpi 会把字号和行距一起等比放大，效果与其它程序一致。
+if [ "$DO_ROFI" = 1 ]; then
+  RC="$XDG_CONFIG_HOME/rofi/config.rasi"
+  if [ -e "$RC" ] && ! grep -q '由 auto-dpi 生成' "$RC" 2>/dev/null; then
+    log "⚠ $RC 是你自己的配置，为免覆盖已跳过 rofi 缩放（想让它接管就删掉该文件）"
+  else
+    mkdir -p "$(dirname "$RC")"
+    cat > "$RC" <<EOF
+/* 由 auto-dpi 生成，请勿手改（改 $CONF）
+ * rofi 2.0 不读 Xft.dpi，也不读 X resources 的 rofi.dpi，缩放只能在这里给。
+ * 屏幕 ${W}x${H} @ ${REAL_DPI}DPI → ${S}x
+ * 想自己接管：把 auto-dpi.conf 的 DO_ROFI 设为 0，然后随意编辑本文件。 */
+configuration {
+  dpi: $DPI;
+}
+EOF
+  fi
+fi
+
+# 8) IntelliJ —— 现代 JetBrains 会通过 JRE 自动跟随 GDK_SCALE，一般不用管。
+if [ "$DO_IDEA" = 1 ]; then
+  for d in "$XDG_CONFIG_HOME"/JetBrains/*/; do
+    [ -d "$d" ] || continue
+    f="$d/idea64.vmoptions"
+    backup "$f"
+    if [ -f "$f" ] && grep -q 'sun.java2d.uiScale=' "$f"; then
+      sed -i -E "s|^-Dsun\.java2d\.uiScale=.*|-Dsun.java2d.uiScale=$S|" "$f"
+    else
+      printf -- '-Dsun.java2d.uiScale=%s\n' "$S" >> "$f"
+    fi
+  done
+fi
+
+# 9) i3 自己的字体。
+#    实测：i3 用 PangoCairo 渲染标题栏和 i3bar，它【不会】读 Xft.dpi
+#    （Xft.dpi=192 时 i3bar 仍是 22px；把字号从 8 改成 16 才变成 36px）。
+#    所以 i3 的字号只能在配置里按倍数改。基准字号在 ~/.config/auto-dpi.conf。
+if [ -n "$I3_FONT_SPEC" ]; then
+  I3CONF="$XDG_CONFIG_HOME/i3/config"
+  if [ -f "$I3CONF" ]; then
+    new_size=$(awk -v b="$I3_FONT_BASE" -v s="$S" 'BEGIN{printf "%d", b*s + 0.5}')
+    new_line="font $I3_FONT_SPEC $new_size"
+    cur=$(grep -m1 '^font ' "$I3CONF" || true)
+    if [ "$cur" != "$new_line" ]; then
+      backup "$I3CONF"
+      awk -v nl="$new_line" '!done && /^font / {print nl; done=1; next} {print}' \
+        "$I3CONF" > "$I3CONF.auto-dpi.tmp"
+      cat "$I3CONF.auto-dpi.tmp" > "$I3CONF"   # 用 cat 写回，保留原权限
+      rm -f "$I3CONF.auto-dpi.tmp"
+      log "i3 字体: ${cur:-（无）} → $new_line"
+    fi
+  fi
+fi
+
+# ------------------------------------------------- 让已经跑着的程序重新读配置
+OLD=""
+[ -f "$STATEFILE" ] && OLD=$(awk '{print $1}' "$STATEFILE" 2>/dev/null || true)
+mkdir -p "$STATEDIR"
+printf '%s\t%s\t%s\t%sx%s\t%sDPI\t%s\n' \
+  "$S" "$(date '+%F %T')" "$OUT" "$W" "$H" "$REAL_DPI" "$CURSOR_PX" > "$STATEFILE"
+
+CHANGED=1
+[ "$OLD" = "$S" ] && CHANGED=0
+
+if [ -n "${I3SOCK:-}" ] && command -v i3-msg >/dev/null; then
+  # i3 的标题栏和 i3bar 是 Pango 渲染的，reload 后才会用上新的 Xft.dpi
+  i3-msg -q reload 2>/dev/null || true
+fi
+
+if [ "$CHANGED" = 1 ] && [ "$RESTART_FCITX5" = 1 ] && [ -n "${I3SOCK:-}" ]; then
+  if pgrep -x fcitx5 >/dev/null 2>&1; then
+    log "倍数变化 → 重启 fcitx5 让输入法窗口跟着缩放"
+    fcitx5 -r -d >/dev/null 2>&1 || true
+    sleep 1
+    # 兜底：万一 replace 失败，别把输入法留在死掉的状态
+    if ! pgrep -x fcitx5 >/dev/null 2>&1; then
+      log "fcitx5 没起来，重新拉一次"
+      fcitx5 -d >/dev/null 2>&1 &
+    fi
+  fi
+fi
+
+if [ "$CHANGED" = 1 ] && command -v notify-send >/dev/null; then
+  # 这台机器没有通知守护进程，裸调 notify-send 会阻塞约 1 分钟，所以套 timeout。
+  timeout 2 notify-send -t 3000 "auto-dpi" \
+    "${OUT} ${W}x${H} → 缩放 ${S}x (Xft.dpi=$DPI)" 2>/dev/null || true
+fi
+
+log "完成。已运行的 GTK/Qt 程序需要重启才会应用新缩放。"

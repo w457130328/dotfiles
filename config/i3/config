@@ -11,7 +11,7 @@ exec --no-startup-id xset s off -dpms
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
-font pango:Open Sans, Symbola 8
+font pango:Open Sans, Symbola 16
 
 workspace_layout tabbed
                         #border backgr  text    indicator
@@ -170,6 +170,10 @@ bindsym $mod+grave exec "_switch-keyboard"
 bindsym $mod+Shift+grave exec "_switch-keyboard-default"
 bindsym $mod+Cyrillic_io exec "_switch-keyboard"
 bindsym $mod+Shift+Cyrillic_io exec "_switch-keyboard-default"
+
+# 重新检测屏幕分辨率/物理尺寸并应用缩放（切 4K/1080p 之后按一下即可）
+# 脚本自己会调 i3-msg reload 让标题栏和 i3bar 用上新字号
+bindsym $mod+Mod1+d exec --no-startup-id auto-dpi
 
 # reload the configuration file
 bindsym $mod+Shift+c reload
