@@ -1,0 +1,266 @@
+#!/usr/bin/env bash
+#
+# wallpaper-fetch —— 从 Bing 每日壁纸归档里抓图，4K / 1080p 成对入库。
+#
+#   wallpaper-fetch                    抓最近 20 天，两种分辨率都下
+#   wallpaper-fetch --res 1080p        只下 1080p（1080p 那台机器上跑这句就够）
+#   wallpaper-fetch --count 30         抓最近 30 天
+#   wallpaper-fetch --dry-run          只列出会抓哪些，不真抓
+#
+# 目录布局跟 bin/wallpaper-rotate 对齐：
+#   $DEST/4k/      3840x2160
+#   $DEST/1080p/   1920x1080
+# 同一天同一张图在两个目录里文件名相同，方便肉眼对照。
+#
+# 每张图下完都校验真实像素，尺寸不对的当场删掉重试并计入失败 —— 宁可少一张，
+# 也不要往池子里混一张拉伸糊图。已存在且尺寸正确的文件直接跳过，所以重复跑只补缺的。
+#
+# 归档来源：GitHub 上的 niumoo/bing-wallpaper。Bing 官方的 HPImageArchive 只给最近
+# 8 张、换 mkt 参数也没用（还是那 8 张），所以用这份归档。归档每天更新，本地缓存一天。
+#
+# 注意：这些图版权属各家摄影师（Getty/Alamy 等），Bing 提供给自己当桌面用，
+# 个人机器上自用没问题，别打包外传。
+#
+# 依赖：curl、python3
+#
+set -euo pipefail
+
+ARCHIVE_URL="https://cdn.jsdelivr.net/gh/niumoo/bing-wallpaper@main/bing-wallpaper.md"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/wallpaper-fetch"
+CACHE="$CACHE_DIR/bing-wallpaper.md"
+CACHE_MAX_AGE=$((24 * 3600)) # 秒
+
+DEST="${WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
+COUNT=20
+RES=both
+DELAY=2 # 每次请求之间歇几秒；并发抓会被 Bing 限流，返回 404 而不是 429
+DRY_RUN=false
+
+UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120 Safari/537.36"
+
+usage() {
+    awk 'NR > 1 {if ($0 !~ /^#/) exit; sub(/^# ?/, ""); print}' "$0"
+}
+
+# --- 分辨率表 --------------------------------------------------------------
+res_suffix() {
+    case "$1" in
+        4k) echo "_UHD.jpg" ;;
+        1080p) echo "_1920x1080.jpg" ;;
+    esac
+}
+res_dir() {
+    case "$1" in
+        4k) echo "4k" ;;
+        1080p) echo "1080p" ;;
+    esac
+}
+res_expect() {
+    case "$1" in
+        4k) echo "3840x2160" ;;
+        1080p) echo "1920x1080" ;;
+    esac
+}
+
+# --- 参数 ------------------------------------------------------------------
+while (($#)); do
+    case "$1" in
+        --res)
+            case "${2:-}" in
+                4k | 1080p) RES="$2" ;;
+                both) RES=both ;;
+                *)
+                    echo "wallpaper-fetch: --res 只认 4k / 1080p / both" >&2
+                    exit 2
+                    ;;
+            esac
+            shift 2
+            ;;
+        --count)
+            COUNT="${2:-}"
+            [[ "$COUNT" =~ ^[0-9]+$ ]] && ((COUNT > 0)) || {
+                echo "wallpaper-fetch: --count 要是正整数" >&2
+                exit 2
+            }
+            shift 2
+            ;;
+        --dest)
+            DEST="${2:?--dest 后面要跟目录}"
+            shift 2
+            ;;
+        --delay)
+            DELAY="${2:?--delay 后面要跟秒数}"
+            shift 2
+            ;;
+        --dry-run) DRY_RUN=true; shift ;;
+        --help | -h)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "wallpaper-fetch: 不认识的参数: $1（试试 --help）" >&2
+            exit 2
+            ;;
+    esac
+done
+
+if [[ "$RES" == both ]]; then res_list=(4k 1080p); else res_list=("$RES"); fi
+
+# --- 工具 ------------------------------------------------------------------
+
+# 读 JPEG 的真实像素，打印 WxH；读不出来就不打印（当作校验失败）
+jpeg_dims() {
+    python3 - "$1" <<'PY'
+import struct, sys
+try:
+    d = open(sys.argv[1], 'rb').read()
+except OSError:
+    sys.exit(1)
+i = 2
+while i < len(d) - 9:
+    if d[i] != 0xFF:
+        i += 1
+        continue
+    m = d[i + 1]
+    if m in (0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7,
+             0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF):
+        h, w = struct.unpack('>HH', d[i + 5:i + 9])
+        print(f"{w}x{h}")
+        break
+    if m in (0xD8, 0xD9) or 0xD0 <= m <= 0xD7:
+        i += 2
+        continue
+    i += 2 + struct.unpack('>H', d[i + 2:i + 4])[0]
+PY
+}
+
+# 取归档清单（一天内用缓存，省得每次拉 400KB）
+archive_file() {
+    if [[ -f "$CACHE" ]] && (($(date +%s) - $(stat -c %Y "$CACHE") < CACHE_MAX_AGE)); then
+        echo "$CACHE"
+        return 0
+    fi
+    mkdir -p "$CACHE_DIR"
+    if curl -sL -m 60 -A "$UA" -o "$CACHE.part" "$ARCHIVE_URL" && [[ -s "$CACHE.part" ]]; then
+        mv "$CACHE.part" "$CACHE"
+        echo "$CACHE"
+    else
+        rm -f "$CACHE.part"
+        if [[ -f "$CACHE" ]]; then # 拉不到就用过期的旧缓存，总比没有强
+            echo "拉归档失败，改用旧缓存（$(date -d @"$(stat -c %Y "$CACHE")" '+%F %H:%M')）" >&2
+            echo "$CACHE"
+        else
+            echo "wallpaper-fetch: 拉不到归档清单 $ARCHIVE_URL（墙？网断了？）" >&2
+            return 1
+        fi
+    fi
+}
+
+# 解析归档，输出 TSV：短名 \t OHR-id \t 日期 \t 描述
+parse_archive() {
+    python3 - "$1" "$COUNT" <<'PY'
+import re, sys
+archive, n = sys.argv[1], int(sys.argv[2])
+row = re.compile(r'^(\d{4}-\d{2}-\d{2}) \| \[(.*?)\]\((https://[^)]+)\)')
+ohr = re.compile(r'OHR\.(.+?)_([A-Z]{2}-[A-Z]{2})(\d+)_UHD\.jpg')
+seen, out = set(), []
+for line in open(archive, encoding='utf-8'):
+    m = row.match(line)
+    if not m:
+        continue
+    date, desc, url = m.groups()
+    m2 = ohr.search(url)
+    if not m2:
+        continue
+    name, locale, num = m2.groups()
+    slug = re.sub(r'[^a-z0-9]+', '', name.lower()) or 'wall'
+    key = f"{date}-{slug}"
+    if key in seen:                      # 同一天撞名，接上数字后缀区分
+        key = f"{date}-{slug}-{num}"
+    seen.add(key)
+    out.append((key, f"OHR.{name}_{locale}{num}", date, desc))
+    if len(out) >= n:
+        break
+for key, uid, date, desc in out:
+    print(f"{key}\t{uid}\t{date}\t{desc}")
+PY
+}
+
+# 下载 + 校验一个文件；成功 0，失败 1
+grab() { # $1=url $2=目标文件 $3=期望 WxH
+    local url=$1 target=$2 expect=$3 try
+    for try in 1 2; do
+        if curl -sL -m 90 -A "$UA" -o "$target.part" "$url" && [[ -s "$target.part" ]]; then
+            mv "$target.part" "$target"
+            if [[ "$(jpeg_dims "$target")" == "$expect" ]]; then
+                return 0
+            fi
+            echo "  尺寸不对（$(jpeg_dims "$target") ≠ $expect），重试" >&2
+            rm -f "$target"
+        else
+            rm -f "$target.part"
+        fi
+        sleep $((DELAY + 2)) # 失败多半是被限流了，多歇一会儿
+    done
+    return 1
+}
+
+# --- 开跑 ------------------------------------------------------------------
+
+echo "目标目录: $DEST"
+echo "分辨率:   ${res_list[*]}    天数: $COUNT"
+mkdir -p "$DEST"
+for r in "${res_list[@]}"; do mkdir -p "$DEST/$(res_dir "$r")"; done
+
+archive=$(archive_file)
+mapfile -t rows < <(parse_archive "$archive")
+if ((${#rows[@]} == 0)); then
+    echo "wallpaper-fetch: 归档里没解析出任何条目" >&2
+    exit 1
+fi
+echo "归档条目: ${#rows[@]} 天"
+echo
+
+ok=0 skipped=0 failed=0
+declare -a failures=()
+for row in "${rows[@]}"; do
+    IFS=$'\t' read -r key uid date desc <<< "$row"
+    for r in "${res_list[@]}"; do
+        target="$DEST/$(res_dir "$r")/$key.jpg"
+        expect=$(res_expect "$r")
+        if [[ -f "$target" ]]; then
+            if [[ "$(jpeg_dims "$target")" == "$expect" ]]; then
+                skipped=$((skipped + 1))
+                continue
+            fi
+            echo "重下（尺寸不对）: $(res_dir "$r")/$key.jpg"
+        fi
+        url="https://cn.bing.com/th?id=${uid}$(res_suffix "$r")"
+        if $DRY_RUN; then
+            echo "  [dry-run] $(res_dir "$r")/$key.jpg   ← ${desc:0:50}"
+            continue
+        fi
+        printf '  下 %-8s %-28s ' "$(res_dir "$r")" "$key.jpg"
+        if grab "$url" "$target" "$expect"; then
+            printf 'OK  %s\n' "$(du -h "$target" | cut -f1)"
+            ok=$((ok + 1))
+        else
+            printf '失败\n'
+            failed=$((failed + 1))
+            failures+=("$(res_dir "$r")/$key.jpg")
+        fi
+        sleep "$DELAY"
+    done
+done
+
+echo
+if $DRY_RUN; then
+    echo "dry-run 结束，什么都没下。"
+    exit 0
+fi
+printf '完成：新下 %d，跳过 %d（已有且尺寸正确），失败 %d\n' "$ok" "$skipped" "$failed"
+if ((failed)); then
+    printf '失败清单：%s\n' "${failures[*]}"
+    echo "（多半是被 Bing 限流了，隔几分钟重跑一次就会补上）"
+    exit 1
+fi
