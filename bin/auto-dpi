@@ -7,21 +7,20 @@
 #
 #   谁                          听谁的
 #   --------------------------  ------------------------------------------
-#   i3 标题栏 / i3bar           自己的 font 指令（实测【不读】Xft.dpi！）
+#   i3 标题栏 / i3bar           Xft.dpi，但【只在 i3 启动时读一次】
 #   rofi                        自己 config.rasi 里的 dpi（实测【不读】Xft.dpi！）
 #   xterm 等 Xft 程序           Xft.dpi（X resource）
-#   GTK 2/3                     Xft.dpi + GDK_SCALE + GDK_DPI_SCALE
-#   GTK 4                       GDK_SCALE + GDK_DPI_SCALE（不读 Xft.dpi）
+#   GTK 2/3/4                   xsettingsd 的 Gdk/WindowScalingFactor（不设 GDK_SCALE）
 #   Qt 5/6                      QT_SCALE_FACTOR + QT_FONT_DPI
-#   Firefox                     GDK_SCALE（界面）+ prefs 的 devPixelsPerPx
-#   Chromium / Electron         GDK_SCALE（+ 启动参数兜底）
-#   Java/Swing (IDEA)           GDK_SCALE（JRE 自动侦测）
+#   Firefox                     网页内容 devPixelsPerPx；界面跟着 GTK
+#   Chromium / Electron         GTK 那套（别再加启动参数，会和它叠成 4 倍）
+#   Java/Swing (IDEA)           屏幕 DPI（会被 GDK_DPI_SCALE 干扰，所以不设它）
 #   Alacritty / winit           Xft.dpi（winit 自己读）
 #
 # 接管/生成的文件：~/.Xresources、~/.config/gtk-{3,4}.0/settings.ini、
 #   ~/.config/xsettingsd/xsettingsd.conf、~/.config/i3/config 的 font 行、
-#   ~/.config/auto-dpi/env.sh、~/.config/chromium-flags.conf、Firefox 的 user.js、
-#   ~/.config/rofi/config.rasi。
+#   ~/.config/auto-dpi/env.sh、Firefox 的 user.js、~/.config/rofi/config.rasi。
+# （不再改动 i3 配置的 font 行，也不再写 chromium-flags.conf——原因见对应段落。）
 # 这些文件的原件首次运行时会备份到 ~/.local/state/auto-dpi/backup/ 下（镜像原路径）。
 #
 # 用法:
@@ -52,9 +51,6 @@ DO_FIREFOX=1          # 写 Firefox 网页 DPI
 DO_ROFI=1             # 写 rofi 的 config.rasi（它不读 Xft.dpi）
 DO_IDEA=0             # IntelliJ：现代版本自动跟随 GDK_SCALE，通常不用开
 RESTART_FCITX5=1      # 倍数变化时重启 fcitx5（否则输入法窗口还是旧大小）
-
-I3_FONT_SPEC="pango:Open Sans, Symbola"   # i3 标题栏/i3bar 字体（不含字号）
-I3_FONT_BASE=8                            # 1x 下的基准字号；写入值 = 基准 × 倍数
 
 SHOW=0
 while [ $# -gt 0 ]; do
@@ -134,8 +130,7 @@ S=$(pick_scale)
 DPI=$(awk -v b="$BASE_DPI" -v s="$S" 'BEGIN{printf "%.0f", b*s}')
 DPI_MILLI=$(( DPI * 1024 ))                       # GTK 的 DPI 单位是 1/1024
 CURSOR_PX=$(awk -v c="$CURSOR_SIZE" -v s="$S" 'BEGIN{printf "%.0f", c*s}')
-GDK_INT=$(awk -v s="$S" 'BEGIN{printf "%.0f", (s < 1 ? 1 : s)}')   # GDK_SCALE 只能整数
-GDK_DPI=$(awk -v g="$GDK_INT" 'BEGIN{printf "%.4g", 1/g}')
+GDK_INT=$(awk -v s="$S" 'BEGIN{printf "%.0f", (s < 1 ? 1 : s)}')   # 窗口缩放只能整数
 FF_DPR=$(awk -v s="$S" 'BEGIN{printf "%.1f", s}')
 
 if [ "$SHOW" = 1 ]; then
@@ -148,11 +143,8 @@ if [ "$SHOW" = 1 ]; then
 缩放倍数  : ${S}x
 → Xft.dpi            : $DPI
 → gtk-xft-dpi        : $DPI_MILLI
-→ GDK_SCALE          : $GDK_INT
-→ GDK_DPI_SCALE      : $GDK_DPI
-→ QT_SCALE_FACTOR    : $S   (QT_FONT_DPI=$BASE_DPI)
-→ i3 字体            : $I3_FONT_SPEC $(
-    awk -v b="$I3_FONT_BASE" -v s="$S" 'BEGIN{printf "%d", b*s + 0.5}')
+→ GDK_/Qt 环境变量   : 不设 GDK_SCALE（GTK 缩放交给 xsettingsd），QT_SCALE_FACTOR=$S
+→ i3 字体            : 不动（i3 启动时读 Xft.dpi，字号保持基准值即可）
 → 光标大小           : $CURSOR_PX px
 → 终端/GTK/Qt 字体   : 字号数值不变，由 DPI 放大（这样 4K 和 1080p 物理大小一致）
 EOF
@@ -280,13 +272,15 @@ cat > "$ENVFILE" <<EOF
 # 由 auto-dpi 生成，请勿手改（改 $CONF）
 # 屏幕 ${W}x${H} @ ${REAL_DPI}DPI → ${S}x
 #
-# GDK_SCALE 把 GTK 的窗口/控件整体放大 N 倍；窗口放大后 GTK 的字体 DPI
-# 也会跟着乘 N，所以必须再用 GDK_DPI_SCALE=1/N 抵消掉，否则字会变成 N² 倍。
-# 实测（10pt 文本的真实像素宽）:  仅 Xft.dpi=192 → 240px / 控件 1x
-#          Xft.dpi=192 + GDK_SCALE=2 + GDK_DPI_SCALE=0.5 → 240px / 控件 2x  ✓
-#          Xft.dpi=192 + GDK_SCALE=2（漏掉后者）        → 480px / 控件 2x  ✗
-export GDK_SCALE=$GDK_INT
-export GDK_DPI_SCALE=$GDK_DPI
+# 【刻意不设 GDK_SCALE / GDK_DPI_SCALE】
+# GTK 的窗口缩放由 xsettingsd 的 Gdk/WindowScalingFactor 提供，不需要环境变量。
+# 曾经用过 GDK_SCALE=2 + GDK_DPI_SCALE=0.5 的组合，GTK 本身是对的，
+# 但它同时踩了两个坑（实测于 4K 登录后）：
+#   1. Chromium 内核的程序（VS Code / Spotify / Chromium）会把它和 GTK 的缩放
+#      各算一次 → 2×2 = 4 倍；
+#   2. GDK_DPI_SCALE=0.5 让 GDK 对外报 96 DPI，Java/IntelliJ 据此判定"无需缩放"
+#      → 完全不放大。
+# 一头过大一头过小，整组去掉后两个问题一起消失。
 EOF
 
 if [ "$DO_QT" = 1 ]; then
@@ -301,14 +295,13 @@ export QT_ENABLE_HIGHDPI_SCALING=1
 EOF
 fi
 
-# 5) Chromium / Electron —— GDK_SCALE 通常已经够；显式指定可避免
-#    某些版本忽略 GDK_SCALE。参数优先于 GDK_SCALE，不会叠加。
-if [ "$DO_CHROMIUM" = 1 ]; then
-  backup "$XDG_CONFIG_HOME/chromium-flags.conf"
-  cat > "$XDG_CONFIG_HOME/chromium-flags.conf" <<EOF
-# 由 auto-dpi 生成，请勿手改（改 $CONF）
---force-device-scale-factor=$S
-EOF
+# 5) Chromium / Electron —— 【不再】写 chromium-flags.conf。
+#    --force-device-scale-factor 会和其它缩放来源叠加（实测 4 倍），
+#    去掉后 Chromium 内核与 VS Code / Spotify 走同一套来源，行为才一致。
+if [ "$DO_CHROMIUM" = 1 ] && [ -f "$XDG_CONFIG_HOME/chromium-flags.conf" ] \
+   && grep -q '由 auto-dpi 生成' "$XDG_CONFIG_HOME/chromium-flags.conf" 2>/dev/null; then
+  rm -f "$XDG_CONFIG_HOME/chromium-flags.conf"
+  log "已删除旧的 chromium-flags.conf（它是 4 倍缩放的成因之一）"
 fi
 
 # 6) Firefox 网页内容缩放。Firefox 在 X11 下不会把 GDK_SCALE 反映到网页的
@@ -373,26 +366,13 @@ if [ "$DO_IDEA" = 1 ]; then
   done
 fi
 
-# 9) i3 自己的字体。
-#    实测：i3 用 PangoCairo 渲染标题栏和 i3bar，它【不会】读 Xft.dpi
-#    （Xft.dpi=192 时 i3bar 仍是 22px；把字号从 8 改成 16 才变成 36px）。
-#    所以 i3 的字号只能在配置里按倍数改。基准字号在 ~/.config/auto-dpi.conf。
-if [ -n "$I3_FONT_SPEC" ]; then
-  I3CONF="$XDG_CONFIG_HOME/i3/config"
-  if [ -f "$I3CONF" ]; then
-    new_size=$(awk -v b="$I3_FONT_BASE" -v s="$S" 'BEGIN{printf "%d", b*s + 0.5}')
-    new_line="font $I3_FONT_SPEC $new_size"
-    cur=$(grep -m1 '^font ' "$I3CONF" || true)
-    if [ "$cur" != "$new_line" ]; then
-      backup "$I3CONF"
-      awk -v nl="$new_line" '!done && /^font / {print nl; done=1; next} {print}' \
-        "$I3CONF" > "$I3CONF.auto-dpi.tmp"
-      cat "$I3CONF.auto-dpi.tmp" > "$I3CONF"   # 用 cat 写回，保留原权限
-      rm -f "$I3CONF.auto-dpi.tmp"
-      log "i3 字体: ${cur:-（无）} → $new_line"
-    fi
-  fi
-fi
+# 9) i3 的字体【不要动】。
+#    i3 用 Pango 渲染标题栏和 i3bar，它确实读 Xft.dpi——但【只在进程启动时读一次】
+#    （Pango 会把分辨率缓存在字体映射里，之后 i3-msg reload 也不会重读）。
+#    所以：Xft.dpi 设成 192、字号保持基准值 8，i3bar 在 4K 下自动就是 2 倍（42px）。
+#    曾经的版本把字号也乘了倍数，结果 8×2 的字号再乘 192/96 的 DPI = 4 倍（71px）。
+#    代价：会话中途改分辨率时 i3bar 不会跟着变——那需要重启 i3（会重跑 exec 行，
+#    可能开出重复的托盘程序），不如重新登录来得干净。
 
 # ------------------------------------------------- 让已经跑着的程序重新读配置
 OLD=""
