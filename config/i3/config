@@ -1,7 +1,8 @@
 set $mod Mod4
 
 exec --no-startup-id /home/jiangtao/.local/bin/auto-primary
-exec --no-startup-id nitrogen --restore
+# 壁纸：随机轮播（每 10 分钟换一张），脚本在 bin/wallpaper-rotate
+exec --no-startup-id /home/jiangtao/bin/wallpaper-rotate
 exec --no-startup-id fcitx5 -d
 exec --no-startup-id snixembed
 exec --no-startup-id nm-applet

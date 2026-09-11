@@ -1,0 +1,162 @@
+#!/usr/bin/env bash
+#
+# wallpaper-rotate —— 按屏幕分辨率挑对应尺寸的壁纸，随机轮播（X11 / feh）。
+#
+# 两台机器屏幕不一样，就别拿 1080p 的图去铺 4K 屏（会被拉伸 4 倍面积，糊）。
+# 本脚本启动时和每次换图前都重新看一眼屏幕宽度，然后挑最合适的那个子目录：
+#
+#   ~/Pictures/Wallpapers/
+#   ├── 4k/        3840x2160   屏幕宽度 ≥ 3840 时优先
+#   ├── 1440p/     2560x1440   屏幕宽度 ≥ 2560 时优先
+#   ├── 1080p/     1920x1080   屏幕宽度 ≥ 1920 时优先
+#   └── (散图)     任意尺寸    以上都不合适时兜底
+#
+# 规则是"在放得下的桶里挑阈值最大的那个非空目录"：
+#   · 4K 屏    → 先看 4k/，空了就退到 1440p/、1080p/
+#   · 1080p 屏 → 直接用 1080p/，跳过 4k/（阈值 3840 超出屏幕，不拿大图去挤）
+#   · 屏幕比所有目录都小 / 认不出屏幕 → 退到最小的那个非空目录
+# 一句话：优先用"不小于屏幕"的图；只有当确实没有够大的图时，才退而用小的（会被拉伸）。
+# 目录名不认识的一律当兜底（阈值 0）。多显示器取最宽的那块，因为壁纸要铺满全部。
+#
+#   wallpaper-rotate          死循环轮播，间隔 $WALLPAPER_INTERVAL 秒（默认 600 = 10 分钟）
+#   wallpaper-rotate --once   只换一张就退出（手动换图 / 自测用）
+#   wallpaper-rotate --info   只打印识别到的屏幕和会选用的目录，不动壁纸
+#
+# 可覆盖的环境变量：WALLPAPER_DIR、WALLPAPER_INTERVAL、WALLPAPER_SCREEN_WIDTH
+#
+# 由 i3 启动（见 config/i3/config）。用 flock 保证同一时刻只有一个实例：
+# i3 重载（Mod+Shift+R）不会杀掉上次启动的循环，没有这把锁就会越积越多。
+#
+set -euo pipefail
+
+WALLPAPER_DIR="${WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
+INTERVAL="${WALLPAPER_INTERVAL:-600}"
+
+mode=loop
+case "${1:-}" in
+    --once) mode=once ;;
+    --info) mode=info ;;
+    --help | -h)
+        awk 'NR > 1 {if ($0 !~ /^#/) exit; sub(/^# ?/, ""); print}' "$0"
+        exit 0
+        ;;
+    "") ;;
+    *)
+        echo "wallpaper-rotate: 不认识的参数: $1（试试 --help）" >&2
+        exit 2
+        ;;
+esac
+
+# 屏幕逻辑宽度，单位像素。多显示器取最宽的一块。
+# $WALLPAPER_SCREEN_WIDTH 可以强制指定，用来在 4K 机器上试 1080p 那条路径。
+screen_width() {
+    local w
+    if [[ -n "${WALLPAPER_SCREEN_WIDTH:-}" ]]; then
+        echo "$WALLPAPER_SCREEN_WIDTH"
+        return 0
+    fi
+    w=$(xrandr --listmonitors 2>/dev/null |
+        awk 'NR>1 {split($3, a, "/"); split(a[1], b, "x"); if (b[1]+0 > m) m = b[1]+0} END {print m+0}')
+    if [[ "${w:-0}" -eq 0 ]]; then
+        w=$(xdpyinfo 2>/dev/null | awk '/dimensions:/ {split($2, a, "x"); print a[1]+0}')
+    fi
+    echo "${w:-0}"
+}
+
+# 目录名 → 需要的屏幕宽度下限。不认识的目录给 0，当兜底。
+bucket_min_width() {
+    case "${1,,}" in
+        4k | 2160p) echo 3840 ;;
+        1440p) echo 2560 ;;
+        1080p) echo 1920 ;;
+        *) echo 0 ;;
+    esac
+}
+
+# 只看这一层，不递归：~/Pictures/Screenshots 之类的子目录不会被当成壁纸库。
+collect_images() {
+    find "$1" -maxdepth 1 -type f \
+        \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \
+        -o -iname '*.webp' -o -iname '*.bmp' \) -print0 2>/dev/null | sort -z
+}
+
+# 组装候选目录：每个子目录一个桶，根目录里的散图作为兜底桶
+declare -a names=() thresholds=() paths=()
+for d in "$WALLPAPER_DIR"/*/; do
+    [[ -d "$d" ]] || continue
+    n=$(basename "$d")
+    names+=("$n")
+    thresholds+=("$(bucket_min_width "$n")")
+    paths+=("$d")
+done
+names+=("(根目录散图)")
+thresholds+=(0)
+paths+=("$WALLPAPER_DIR")
+
+# 按阈值从大到小排；屏幕放不下的桶会被下面的循环跳过
+order=$(for ((i = 0; i < ${#names[@]}; i++)); do echo "${thresholds[i]} $i"; done |
+    sort -rn -k1 | awk '{print $2}')
+order_asc=$(echo "$order" | tr ' ' '\n' | tac | tr '\n' ' ')
+
+declare -a images=()
+chosen=""
+choose_bucket() {
+    local sw=$1 i
+    images=() chosen=""
+    local try
+    for try in "$order" "$order_asc"; do          # 先挑放得下的桶里最大的，都不行再退到最小的
+        for i in $try; do
+            [[ "${thresholds[i]}" -le "$sw" || "$try" == "$order_asc" ]] || continue
+            mapfile -t -d '' images < <(collect_images "${paths[i]}")
+            if ((${#images[@]})); then chosen=$i; return 0; fi
+        done
+    done
+    return 1
+}
+
+sw=$(screen_width)
+if [[ "$mode" == info ]]; then
+    printf '屏幕宽度   %s px\n' "$sw"
+    for ((i = 0; i < ${#names[@]}; i++)); do
+        mapfile -t -d '' t < <(collect_images "${paths[i]}")
+        printf '  %-14s 阈值 %-5s %s 张\n' "${names[i]}" "${thresholds[i]}" "${#t[@]}"
+    done
+    if choose_bucket "$sw"; then
+        printf '会选用     %s（%d 张）\n' "${names[chosen]}" "${#images[@]}"
+    else
+        printf '会选用     （没找到任何图片，检查 %s）\n' "$WALLPAPER_DIR"
+        exit 1
+    fi
+    exit 0
+fi
+
+if ! choose_bucket "$sw"; then
+    echo "wallpaper-rotate: $WALLPAPER_DIR 下任何目录都没有图片文件" >&2
+    exit 1
+fi
+
+last=""
+set_wallpaper() {
+    local pick="${images[RANDOM % ${#images[@]}]}"
+    # 目录里只有一张图时不重复设置；多张时避免连着两次抽中同一张
+    [[ "$pick" == "$last" ]] && return 0
+    # --no-fehbg：不让 feh 去写 ~/.fehbg，这个脚本自己就是唯一事实来源
+    feh --no-fehbg --bg-fill "$pick" || echo "wallpaper-rotate: feh 铺图失败: $pick" >&2
+    last="$pick"
+}
+
+if [[ "$mode" == once ]]; then
+    set_wallpaper
+    exit 0
+fi
+
+exec 9>"${XDG_RUNTIME_DIR:-/run/user/$UID}/wallpaper-rotate.lock"
+flock -n 9 || exit 0
+
+while true; do
+    # 每轮重新选桶：这样中途往目录里加图、或者换了显示器分辨率，都能自己跟上
+    choose_bucket "$(screen_width)" && set_wallpaper
+    # 9>&- 必须带着：否则 sleep 会继承锁的 fd，本脚本被杀后这个 sleep 变成孤儿
+    # 却还攥着锁，后面每次启动都在 flock 那一步静默退出（这个坑踩过）
+    sleep "$INTERVAL" 9>&-
+done
