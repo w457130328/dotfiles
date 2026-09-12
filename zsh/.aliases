@@ -305,3 +305,4 @@ alias -s {zip,ZIP,war,WAR}="unzip -l"
 alias -s {jar,JAR}="java -jar"
 alias -s gz="tar -tf"
 alias -s {tgz,TGZ}="tar -tf"
+alias -s {md,MD,markdown,MARKDOWN}='background typora'
