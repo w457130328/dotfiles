@@ -293,12 +293,16 @@ EOF
 if [ "$DO_QT" = 1 ]; then
   cat >> "$ENVFILE" <<EOF
 
-# Qt：QT_SCALE_FACTOR 放大整个界面，但 Qt 的字体 DPI 也从 Xft.dpi 取，
-# 会二次放大；用 QT_FONT_DPI 把字体 DPI 钉回基准值。
-export QT_SCALE_FACTOR=$S
-export QT_FONT_DPI=$BASE_DPI
-export QT_AUTO_SCREEN_SCALE_FACTOR=0
+# Qt：【不要设 QT_SCALE_FACTOR】——让 Qt 自己按屏幕 DPI 侦测。
+# 实测 2026-09-12：设了 QT_SCALE_FACTOR=2 时微信（Qt 界面）变成 4 倍，
+# 因为 Qt 自动侦测到的倍数会和这个手工值【相乘】。Arch Wiki 明确警告过：
+# 手工设缩放而不关掉自动侦测，显式启用 high-DPI 的程序会被再乘一次。
+# 而微信这类程序启动时会把 QT_AUTO_SCREEN_SCALE_FACTOR 自己改回 1
+# （覆盖我们设的 0），所以这边关不掉，只能干脆不设手工倍数。
+# 附带好处：Qt 程序按当前屏幕走，不再依赖登录时冻结的环境变量——
+# 换屏后重启程序就对了，和 IDEA 一样。
 export QT_ENABLE_HIGHDPI_SCALING=1
+export QT_AUTO_SCREEN_SCALE_FACTOR=1
 EOF
 fi
 
@@ -400,10 +404,13 @@ printf '%s\t%s\t%s\t%sx%s\t%sDPI\t%s\n' \
 CHANGED=1
 [ "$OLD" = "$S" ] && CHANGED=0
 
-if [ -n "${I3SOCK:-}" ] && command -v i3-msg >/dev/null; then
-  # i3 的标题栏和 i3bar 是 Pango 渲染的，reload 后才会用上新的 Xft.dpi
-  i3-msg -q reload 2>/dev/null || true
-fi
+# 这里【刻意不执行 i3-msg reload】，两个原因：
+#   1. 没用：i3 只在进程启动时读 Xft.dpi（Pango 把分辨率缓存在字体映射里），
+#      reload 不会让它重读，所以达不到"让 i3bar 用上新字号"的目的——那要重新登录。
+#   2. 有害：i3 的 reload 会重启 i3bar，i3bar 一重启托盘（XEmbed host）就重建，
+#      里面的图标全部被销毁重挂。微信这类程序会因此把主窗口留在 unmapped 状态，
+#      表现为"进程活着、托盘图标在，但点启动器打不开窗口"（单实例机制把它挡回来）。
+# 2026-09-12 实测踩过：连续跑几次 auto-dpi 就把微信搞成了这个样子。
 
 if [ "$CHANGED" = 1 ] && [ "$RESTART_FCITX5" = 1 ] && [ -n "${I3SOCK:-}" ]; then
   if pgrep -x fcitx5 >/dev/null 2>&1; then
