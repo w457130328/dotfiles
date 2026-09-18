@@ -125,3 +125,5 @@ proxy_off() {
   unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY
   echo "🔴 代理已关闭"
 }
+export DISABLE_AUTOUPDATER=1
+export DISABLE_UPDATES=1
