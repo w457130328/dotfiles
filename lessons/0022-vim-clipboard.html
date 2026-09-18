@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0022 · 改得动 ①：修 vim 系统剪贴板</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <h1>改得动 ①：修 vim 系统剪贴板</h1>
+
+  <p>进入第二阶段「改得动」——不再只是用，而是<b>理解原理、动手修</b>。第一课修最值的：<b>系统剪贴板</b>。修好后 <kbd>空格</kbd>+<kbd>y</kbd>（复制）、<kbd>空格</kbd>+<kbd>p</kbd>（粘贴）就能在 vim 和浏览器/别的程序之间互通了。</p>
+
+  <h2>现象</h2>
+  <p><code>空格+y</code> 复制、<code>空格+p</code> 粘贴没反应。因为它们绑的是 <code>"+</code> 寄存器（系统剪贴板），而你的 vim 编译时<b>没带</b>系统剪贴板支持。</p>
+
+  <h2>原理：-clipboard 但留了钩子</h2>
+  <p>先看 <code>vim --version</code> 里的两个词：</p>
+  <ul>
+    <li><code>-clipboard</code> —— 没编译进系统剪贴板，所以 <code>"+</code> 寄存器默认是死的；</li>
+    <li><code>+clipboard_provider</code> —— 但留了个<b>钩子</b>：允许你用 vimscript 函数「接管」<code>"+</code>/<code>"*</code>，通过外部命令读写剪贴板。</li>
+  </ul>
+  <p>你的机器是 X11（<code>DISPLAY=:0</code>）且装了 <code>xclip</code>，所以写一个「xclip provider」接上钩子，<code>"+</code> 就活了。</p>
+
+  <h2>诊断（以后自己查这三条）</h2>
+  <pre>vim --version | grep -i clipboard    " 看 +clipboard 还是 -clipboard、有没有 provider 钩子
+command -v xclip xsel wl-copy        " 看装了哪个剪贴板工具
+echo $DISPLAY                        " X11 还是 Wayland（决定用 xclip 还是 wl-copy）</pre>
+
+  <h2>改法：.vimrc 加一段</h2>
+  <p>在 <code>.vimrc</code> 里加（<b>逐段看懂，别盲抄</b>）：</p>
+  <pre>" 系统剪贴板（vim 9.x clipboard provider，桥接 xclip）
+function! ClipboardAvailable() abort
+    return executable('xclip')
+endfunction
+
+function! ClipboardCopy(reg, type, lines) abort
+    call system('xclip -selection clipboard', join(a:lines, "\n"))
+endfunction
+
+function! ClipboardPaste(reg) abort
+    return ['', systemlist('xclip -selection clipboard -o')]
+endfunction
+
+let v:clipproviders['xclip'] = {
+    \ 'available': function('ClipboardAvailable'),
+    \ 'copy': {'+': function('ClipboardCopy'), '*': function('ClipboardCopy')},
+    \ 'paste': {'+': function('ClipboardPaste'), '*': function('ClipboardPaste')},
+    \ }
+set clipmethod^=xclip</pre>
+  <ul>
+    <li><code>ClipboardAvailable</code>：告诉 vim「xclip 在不在」，不在就跳过这个 provider；</li>
+    <li><code>ClipboardCopy</code>：vim 把要复制的内容传进来，用 <code>system('xclip …', 内容)</code> 塞进系统剪贴板；</li>
+    <li><code>ClipboardPaste</code>：用 <code>systemlist('xclip -o')</code> 读出剪贴板，返回 <code>[类型, 行列表]</code> 给 vim；</li>
+    <li><code>v:clipproviders['xclip'] = {…}</code>：把三个函数注册成 provider，<code>+</code>/<code>*</code> 两个寄存器都接上；</li>
+    <li><code>set clipmethod^=xclip</code>：把 <code>xclip</code> 设成首选 provider。</li>
+  </ul>
+
+  <h2>验证</h2>
+  <ol>
+    <li>vim 里选中一段，按 <kbd>空格</kbd>+<kbd>y</kbd>，切到浏览器 <kbd>Ctrl</kbd>+<kbd>V</kbd> 粘贴——看有没有；</li>
+    <li>从浏览器复制一段，回 vim 按 <kbd>空格</kbd>+<kbd>p</kbd>——看有没有。</li>
+  </ol>
+
+  <h2>检验一下（原理理解）</h2>
+  <div class="quiz" data-quiz='[
+    {"q":"空格+y 失效，根本原因是什么？","options":["vim 没编译剪贴板","xclip 工具没装","空格键映射坏了","配置写错了"],"answer":0,"explain":"vim --version 显示 -clipboard。"},
+    {"q":"哪个特性允许用函数接管 + 寄存器？","options":["+clipboard_provider","+xterm_clipboard","+insert_expand","+postscript"],"answer":0,"explain":"+clipboard_provider 是钩子。"},
+    {"q":"把 provider 设成首选，用哪个命令？","options":["set clipmethod^=xclip","set clipboard=xclip","let g:clipboard","set clip=xclip"],"answer":0,"explain":"clipmethod 是 vim 9.x 新选项。"},
+    {"q":"复制到剪贴板，哪个函数负责？","options":["ClipboardCopy","ClipboardPaste","ClipboardAvailable","ClipboardInit"],"answer":0,"explain":"Copy 用 system 把内容传给 xclip。"}
+  ]'></div>
+
+  <h2>现在就练（真实世界步骤）</h2>
+  <ol class="practice">
+    <li><code>v ~/.vimrc</code>（或 <code>vim .vimrc</code>）打开配置。</li>
+    <li>找个空行，把上面那段粘进去，<code>:w</code> 保存。</li>
+    <li>重启 vim，或 <code>:so %</code> 重新加载当前文件。</li>
+    <li>按上面「验证」两步，测试复制和粘贴两个方向。</li>
+  </ol>
+
+  <div class="primary-source">
+    <span class="label">主要来源</span>
+    <p>vim 官方文档：vim 里 <code>:help clipboard-providers</code>，或在线 <a href="https://vimhelp.org/eval.txt.html#clipboard-providers">clipboard-providers</a>。上一课：<a href="0021-review-all.html">0021 · 总复习</a>。</p>
+  </div>
+
+  <div class="meta">
+    <p>有任何不清楚的地方，直接问我——我是你的老师。</p>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

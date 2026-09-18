@@ -20,6 +20,13 @@
 - 本地一手来源：`zsh/.aliases`、`zsh/oh-my-zsh-custom/custom/shortcuts.zsh`、`zsh/oh-my-zsh-custom/custom/autocomplete.zsh`
   用户真正要用的别名和快捷键。Use for：一切"我这套配置有什么"以它为准。
 
+## Knowledge — vim
+
+- [vim 官方文档：clipboard-providers](https://vimhelp.org/eval.txt.html#clipboard-providers)
+  本机 vim 9.2 剪贴板 provider 的权威定义。Use for：怎么用 vimscript 接管 `"+`/`"*` 寄存器。
+- 本地一手来源：`vim/.vimrc`
+  用户真正在用的映射与插件声明。Use for：一切「这套 vim 配置有什么、改哪里」以它为准。
+
 ## Wisdom (Communities)
 
 - [r/i3wm](https://www.reddit.com/r/i3wm) / [r/zsh](https://www.reddit.com/r/zsh) / [r/vim](https://www.reddit.com/r/vim)
