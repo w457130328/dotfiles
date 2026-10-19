@@ -1,5 +1,5 @@
 [general]
-import = ["/home/jiangtao/.config/alacritty/default.toml", "/home/jiangtao/.config/alacritty/active.toml"]
+import = ["/home/jiangtao/.config/alacritty/default.toml", "/home/jiangtao/.config/alacritty/active.toml", "/home/jiangtao/.config/alacritty/leaf.toml"]
 
 [[keyboard.bindings]]
 key = "Return"

@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Print the working directory of the foreground process of the focused window.
+# xcwd reads the terminal emulator's own cwd, which does not follow the shell's
+# cd; the shell (or its foreground job) is a child of the terminal instead.
+set -u
+
+WID=$(xdotool getactivewindow 2>/dev/null) || exit 1
+[ -n "$WID" ] || exit 1
+PID=$(xprop -id "$WID" _NET_WM_PID 2>/dev/null | awk '{print $3}')
+[ -n "$PID" ] && [ -d "/proc/$PID" ] || exit 1
+
+child=""
+for c in $(pgrep -P "$PID"); do
+    tty=$(ps -o tty= -p "$c" 2>/dev/null | tr -d ' ')
+    if [ -n "$tty" ] && [ "$tty" != "?" ]; then
+        child=$c
+        break
+    fi
+done
+
+if [ -z "$child" ]; then
+    # No pty child; fall back to any child with a readable cwd.
+    for c in $(pgrep -P "$PID"); do
+        if [ -e "/proc/$c/cwd" ]; then
+            readlink -f "/proc/$c/cwd" 2>/dev/null && exit 0
+        fi
+    done
+    exit 1
+fi
+
+tpgid=$(ps -o tpgid= -p "$child" 2>/dev/null | tr -d ' ')
+if [ -n "$tpgid" ] && [ "$tpgid" -gt 0 ] 2>/dev/null && [ -d "/proc/$tpgid" ]; then
+    readlink -f "/proc/$tpgid/cwd" 2>/dev/null && exit 0
+fi
+readlink -f "/proc/$child/cwd" 2>/dev/null

@@ -1,0 +1,43 @@
+[colors.primary]
+background = "#f9faf4"
+foreground = "#947e7b"
+
+[colors.cursor]
+cursor = "#de8043"
+text = "#f9faf4"
+
+[colors.normal]
+black = "#dbd9da"
+red = "#e46c6d"
+green = "#aecdad"
+yellow = "#d8af60"
+blue = "#819fc1"
+magenta = "#b899a8"
+cyan = "#68c7c1"
+white = "#526b6e"
+
+[colors.bright]
+black = "#cdb7aa"
+red = "#d65455"
+green = "#8cb88b"
+yellow = "#c49b4a"
+blue = "#6688ad"
+magenta = "#a38895"
+cyan = "#4eb3ac"
+white = "#3b4d4f"
+
+[font.normal]
+family = "Space Mono"
+style = "Regular"
+
+[font.bold]
+family = "Space Mono"
+style = "Bold"
+
+[font.italic]
+family = "Space Mono"
+style = "Italic"
+
+[font.bold_italic]
+family = "Space Mono"
+style = "Bold Italic"

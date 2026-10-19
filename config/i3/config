@@ -6,20 +6,23 @@ exec --no-startup-id /home/jiangtao/bin/wallpaper-rotate
 exec --no-startup-id fcitx5 -d
 exec --no-startup-id snixembed
 exec --no-startup-id nm-applet
+exec --no-startup-id Snipaste
 exec --no-startup-id /home/jiangtao/.local/bin/v2rayn
-exec --no-startup-id /home/jiangtao/.local/bin/vpn-up
+# exec --no-startup-id /home/jiangtao/.local/bin/vpn-up
 exec --no-startup-id xset s off -dpms
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
-font pango:Open Sans, Symbola 8
+font pango:feathericon 9, Poppins Regular 9
 
 workspace_layout tabbed
-                        #border backgr  text    indicator
-client.focused          #444444 #f4f4f5 #606266 #d3d4d6
-client.focused_inactive #222222 #606266 #e0e0e0 #82848a
-client.unfocused        #222222 #606266 #e0e0e0 #82848a
-client.urgent           #2f343a #900000 #ffffff #900000
+                        #border  background text    indicator child_border
+client.focused          #e46c6d #dbd9da #3b4d4f #b899a8 #819fc1
+client.focused_inactive #dbd9da #dbd9da #3b4d4f #dbd9da #dbd9da
+client.unfocused        #dbd9da #dbd9da #3b4d4f #dbd9da #dbd9da
+client.urgent           #e46c6d #d8af60 #3b4d4f #d8af60 #d8af60
+client.placeholder      #dbd9da #dbd9da #3b4d4f #dbd9da #dbd9da
+client.background       #dbd9da
 
 floating_modifier $mod
 
@@ -27,19 +30,19 @@ floating_modifier $mod
 bindsym $mod+q exec "_i3-graceful-kill"
 
 # open terminal
-bindsym $mod+Return exec alacritty
-bindsym $mod+apostrophe exec alacritty --working-directory "$(xcwd)"
-bindsym $mod+u split h; exec alacritty
-bindsym $mod+y split h; exec alacritty --working-directory "$(xcwd)"
-bindsym $mod+i split v; exec alacritty
-bindsym $mod+o split v; exec alacritty --working-directory "$(xcwd)"
+bindsym $mod+Return exec --no-startup-id /home/jiangtao/bin/urxvt-leaf
+bindsym $mod+apostrophe exec --no-startup-id /home/jiangtao/bin/urxvt-leaf -cd "$(/home/jiangtao/bin/focused-cwd)"
+bindsym $mod+u split h; exec --no-startup-id /home/jiangtao/bin/urxvt-leaf
+bindsym $mod+y split h; exec --no-startup-id /home/jiangtao/bin/urxvt-leaf -cd "$(/home/jiangtao/bin/focused-cwd)"
+bindsym $mod+i split v; exec --no-startup-id /home/jiangtao/bin/urxvt-leaf
+bindsym $mod+o split v; exec --no-startup-id /home/jiangtao/bin/urxvt-leaf -cd "$(/home/jiangtao/bin/focused-cwd)"
 # with VIM
-bindsym $mod+Control+Return exec alacritty -e zsh-vim
-bindsym $mod+Control+apostrophe exec alacritty --working-directory "$(xcwd)" -e zsh-vim
-bindsym $mod+Control+u split h; exec alacritty -e zsh-vim
-bindsym $mod+Control+y split h; exec alacritty --working-directory "$(xcwd)" -e zsh-vim
-bindsym $mod+Control+i split v; exec alacritty -e zsh-vim
-bindsym $mod+Control+o split v; exec alacritty --working-directory "$(xcwd)" -e zsh-vim
+bindsym $mod+Control+Return exec --no-startup-id /home/jiangtao/bin/urxvt-leaf -e zsh-vim
+bindsym $mod+Control+apostrophe exec --no-startup-id /home/jiangtao/bin/urxvt-leaf -cd "$(/home/jiangtao/bin/focused-cwd)" -e zsh-vim
+bindsym $mod+Control+u split h; exec --no-startup-id /home/jiangtao/bin/urxvt-leaf -e zsh-vim
+bindsym $mod+Control+y split h; exec --no-startup-id /home/jiangtao/bin/urxvt-leaf -cd "$(/home/jiangtao/bin/focused-cwd)" -e zsh-vim
+bindsym $mod+Control+i split v; exec --no-startup-id /home/jiangtao/bin/urxvt-leaf -e zsh-vim
+bindsym $mod+Control+o split v; exec --no-startup-id /home/jiangtao/bin/urxvt-leaf -cd "$(/home/jiangtao/bin/focused-cwd)" -e zsh-vim
 
 # start rofi (a program launcher)
 bindsym $mod+g exec rofi -show run
@@ -203,30 +206,32 @@ bindsym $mod+r mode "resize"
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 bar {
+    position top
+    workspace_min_width 24
+    padding 2px 8px 2px 8px
     colors {
-        background #000000
-        statusline #ffffff
-        separator #333333
+        background #f9faf4
+        statusline #3b4d4f
+        separator #f9faf4
 
-
-#client.focused          #444444 #555555 #ffffff
-#client.focused_inactive #222222 #333333 #888888
-#client.unfocused        #222222 #111111 #888888
-#client.urgent           #2f343a #900000 #ffffff
-
-        focused_workspace  #222222 #333333 #ffffff
-        active_workspace   #555555 #666666 #ffffff
-        inactive_workspace #111111 #000000 #888888
-        urgent_workspace   #ff0000 #880000 #ffffff
-        binding_mode       #ff0000 #880000 #ffffff
+        focused_workspace  #f9faf4 #68c7c1 #3b4d4f
+        active_workspace   #f9faf4 #f9faf4 #3b4d4f
+        inactive_workspace #f9faf4 #f9faf4 #3b4d4f
+        urgent_workspace   #f9faf4 #e46c6d #3b4d4f
+        binding_mode       #f9faf4 #d8af60 #3b4d4f
     }
         status_command i3status --config ~/.config/i3status.conf | ~/.config/i3status/bluetooth.py
         tray_output primary
 }
 
-new_window pixel 1
+new_window pixel 8
 focus_follows_mouse no
 
+hide_edge_borders smart
+gaps inner 12
+smart_gaps on
+
+for_window [class=".*"] border pixel 8
 for_window [class=".*"] title_format "%title"
 
 set $mode_system System (l) lock, (e) logout, (x) suspend, (s) suspend & lock, (r) reboot, (h) shutdown

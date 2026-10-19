@@ -5,7 +5,7 @@
 ## 终端
 | 按键 | 功能 |
 |---|---|
-| `Mod+Enter` | 打开 alacritty |
+| `Mod+Enter` | 打开 URxvt（leaf 主题，带格子线） |
 | `Mod+'` | 在当前目录打开 alacritty |
 | `Mod+u` | 水平分割后开终端 |
 | `Mod+y` | 同上(当前目录) |

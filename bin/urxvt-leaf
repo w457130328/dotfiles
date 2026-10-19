@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+xrdb -merge "$HOME/.config/urxvt/leaf.Xresources"
+URXVT="$HOME/.local/opt/urxvt/usr/bin/urxvt"
+
+# i3 resizes the window after URxvt maps it; hide the cursor, wait, clear,
+# then show it so the prompt starts at the top-left without a visible jump.
+pre='printf "\033[?25l"; sleep 0.25; printf "\033[H\033[2J\033[?25h"; '
+
+args=("$@")
+eidx=-1
+for i in "${!args[@]}"; do
+    if [ "${args[$i]}" = "-e" ]; then eidx=$i; break; fi
+done
+
+if [ "$eidx" -ge 0 ]; then
+    opts=("${args[@]:0:$eidx}")
+    cmd=("${args[@]:$((eidx+1))}")
+    exec "$URXVT" "${opts[@]}" -e sh -c "${pre}exec \"\$@\"" sh "${cmd[@]}"
+fi
+
+exec "$URXVT" "$@" -e sh -c "${pre}exec /bin/zsh -l"
