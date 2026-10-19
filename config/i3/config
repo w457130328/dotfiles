@@ -6,8 +6,9 @@ exec --no-startup-id /home/jiangtao/bin/wallpaper-rotate
 exec --no-startup-id fcitx5 -d
 exec --no-startup-id snixembed
 exec --no-startup-id nm-applet
+exec --no-startup-id Snipaste
 exec --no-startup-id /home/jiangtao/.local/bin/v2rayn
-exec --no-startup-id /home/jiangtao/.local/bin/vpn-up
+# exec --no-startup-id /home/jiangtao/.local/bin/vpn-up
 exec --no-startup-id xset s off -dpms
 
 # Font for window titles. Will also be used by the bar unless a different font
